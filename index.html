@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e293b">
+    <title>Учёт изделий</title>
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-full {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .products-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .product-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .product-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .product-count {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, -40%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .close-btn {
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .numbers-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            min-height: 60px;
+        }
+
+        .number-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remove-number {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-email {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 16px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .auth-toggle a {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+        .delete-product-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .product-item {
+            position: relative; /* Важно для позиционирования кнопки */
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Учёт изделий</h1>
+        </div>
+
+        <!-- Загрузка -->
+        <div id="loadingScreen" class="loading">
+            <p>Загрузка...</p>
+        </div>
+
+        <!-- Экран авторизации -->
+        <div id="authScreen" class="hidden">
+            <div class="auth-container">
+                <div class="auth-title" id="authTitle">Вход</div>
+                <div id="authError"></div>
+                <div id="authSuccess"></div>
+                
+                <input type="email" id="authEmail" class="input-full" placeholder="Email" autocomplete="email">
+                <input type="password" id="authPassword" class="input-full" placeholder="Пароль" autocomplete="current-password">
+                
+                <button id="authSubmitBtn" onclick="handleAuth()" style="width: 100%; margin-bottom: 12px;">Войти</button>
+                
+                <div class="auth-toggle">
+                    <span id="authToggleText">Нет аккаунта?</span>
+                    <a onclick="toggleAuthMode()">Зарегистрироваться</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Главный экран -->
+        <div id="mainScreen" class="hidden">
+            <div class="user-info">
+                <div class="user-email" id="userEmail"></div>
+                <button class="logout-btn" onclick="handleLogout()">Выйти</button>
+            </div>
+
+            <div class="input-section">
+                <div class="input-group">
+                    <input type="text" id="productInput" placeholder="Название изделия (например: ХТ04)">
+                    <button onclick="addProduct()">Добавить</button>
+                </div>
+            </div>
+
+            <div class="products-list" id="productsList"></div>
+
+            <div class="empty-state hidden" id="emptyState">
+                <p>Добавьте первое изделие</p>
+            </div>
+        </div>
+
+        <!-- Модальное окно -->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title" id="modalTitle"></div>
+                    <button class="close-btn" onclick="closeModal()">Назад</button>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="numberInput" placeholder="Номер изделия">
+                    <button onclick="addNumber()">Добавить</button>
+                </div>
+                <p class="hint">Для добавления нескольких: 55, 56, 57 или 55-60</p>
+                
+                <div class="numbers-list" id="numbersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+// Supabase конфигурация
+const SUPABASE_URL = 'https://ntsdwbrdxnexgjjekfqk.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2R3YnJkeG5leGdqamVrZnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjQ0MDYsImV4cCI6MjA4NDIwMDQwNn0.5ZrQNwFD-m4Rq4lKzfhPEGbw8BXhIoYViC-nJORosyQ';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let products = [];
+let currentProductId = null;
+let isLoginMode = true;
+let realtimeChannel = null;
+
+// Проверка авторизации при загрузке
+async function init() {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+        currentUser = user;
+        showMainScreen();
+        await loadProducts();
+    } else {
+        showAuthScreen();
+    }
+    
+    document.getElementById('loadingScreen').classList.add('hidden');
+}
+
+// Подписка на изменения авторизации
+supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') {
+        currentUser = session.user;
+        showMainScreen();
+        loadProducts();
+    } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        products = [];
+        showAuthScreen();
+    }
+});
+
+function showAuthScreen() {
+    document.getElementById('authScreen').classList.remove('hidden');
+    document.getElementById('mainScreen').classList.add('hidden');
+}
+
+function showMainScreen() {
+    document.getElementById('authScreen').classList.add('hidden');
+    document.getElementById('mainScreen').classList.remove('hidden');
+    document.getElementById('userEmail').textContent = currentUser.email;
+    setupRealtime();
+}
+
+window.toggleAuthMode = function() {
+    isLoginMode = !isLoginMode;
+    const title = document.getElementById('authTitle');
+    const btn = document.getElementById('authSubmitBtn');
+    const toggleText = document.getElementById('authToggleText');
+    
+    if (isLoginMode) {
+        title.textContent = 'Вход';
+        btn.textContent = 'Войти';
+        toggleText.textContent = 'Нет аккаунта?';
+    } else {
+        title.textContent = 'Регистрация';
+        btn.textContent = 'Зарегистрироваться';
+        toggleText.textContent = 'Уже есть аккаунт?';
+    }
+    
+    document.getElementById('authError').innerHTML = '';
+    document.getElementById('authSuccess').innerHTML = '';
+};
+
+window.handleAuth = async function() {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const errorDiv = document.getElementById('authError');
+    const successDiv = document.getElementById('authSuccess');
+    
+    errorDiv.innerHTML = '';
+    successDiv.innerHTML = '';
+    
+    if (!email || !password) {
+        errorDiv.innerHTML = '<div class="error-message">Заполните все поля</div>';
+        return;
+    }
+
+    const btn = document.getElementById('authSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Загрузка...';
+
+    try {
+        if (isLoginMode) {
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+        } else {
+            const { error } = await supabase.auth.signUp({ email, password });
+            if (error) throw error;
+            successDiv.innerHTML = '<div class="success-message">Регистрация успешна! Проверьте email для подтверждения.</div>';
+        }
+    } catch (error) {
+        errorDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
+        btn.disabled = false;
+        btn.textContent = isLoginMode ? 'Войти' : 'Зарегистрироваться';
+    }
+};
+
+window.handleLogout = async function() {
+    await supabase.auth.signOut();
+};
+
+async function loadProducts() {
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error loading products:', error);
+        return;
+    }
+
+    products = data || [];
+    renderProducts();
+}
+
+async function cleanOldProducts() {
+    const twoMonthsAgo = Date.now() - (60 * 24 * 60 * 60 * 1000);
+    const oldProducts = products.filter(p => new Date(p.last_update).getTime() < twoMonthsAgo);
+    
+    for (const product of oldProducts) {
+        await supabase.from('products').delete().eq('id', product.id);
+    }
+    
+    products = products.filter(p => new Date(p.last_update).getTime() >= twoMonthsAgo);
+}
+
+window.addProduct = async function() {
+    const input = document.getElementById('productInput');
+    const name = input.value.trim();
+    
+    if (!name) return;
+
+    const { data, error } = await supabase
+        .from('products')
+        .insert({
+            user_id: currentUser.id,
+            name: name,
+            numbers: [],
+            last_update: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error adding product:', error);
+        return;
+    }
+
+    products.unshift(data);
+    input.value = '';
+    renderProducts();
+};
+
+function renderProducts() {
+    const list = document.getElementById('productsList');
+    const empty = document.getElementById('emptyState');
+
+    if (products.length === 0) {
+        list.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+    }
+
+    list.innerHTML = products.map(p => `
+    <div class="product-item" onclick="openModal(${p.id})">
+        <div class="product-name">${p.name}</div>
+        <div style="display: flex; align-items: center;">
+            <div class="product-count">${p.numbers.length} шт</div>
+            <button class="delete-product-btn" onclick="deleteProduct(event, ${p.id})">🗑️</button>
+        </div>
+    </div>
+`).join('');
+}
+
+window.openModal = function(productId) {
+    currentProductId = productId;
+    const product = products.find(p => p.id === productId);
+    
+    if (!product) {
+        console.error('Продукт не найден:', productId);
+        return;
+    }
+    
+    document.getElementById('modalTitle').textContent = product.name;
+    document.getElementById('modal').style.display = 'block';
+    renderNumbers();
+};
+
+window.closeModal = function() {
+    document.getElementById('modal').style.display = 'none';
+    document.getElementById('numberInput').value = '';
+    currentProductId = null;
+};
+
+window.addNumber = async function() {
+    const input = document.getElementById('numberInput');
+    const value = input.value.trim();
+    
+    if (!value || !currentProductId) return;
+
+    const product = products.find(p => p.id === currentProductId);
+    const newNumbers = parseNumbers(value);
+    const updatedNumbers = [...product.numbers, ...newNumbers];
+
+    const { error } = await supabase
+        .from('products')
+        .update({ 
+            numbers: updatedNumbers,
+            last_update: new Date().toISOString()
+        })
+        .eq('id', currentProductId);
+
+    if (error) {
+        console.error('Error adding number:', error);
+        return;
+    }
+
+    product.numbers = updatedNumbers;
+    product.last_update = new Date().toISOString();
+    
+    input.value = '';
+    renderNumbers();
+    renderProducts();
+};
+
+function parseNumbers(input) {
+    const numbers = [];
+    const parts = input.split(',').map(s => s.trim());
+    
+    parts.forEach(part => {
+        if (part.includes('-')) {
+            const [start, end] = part.split('-').map(s => parseInt(s.trim()));
+            if (!isNaN(start) && !isNaN(end) && start <= end) {
+                for (let i = start; i <= end; i++) {
+                    numbers.push(i.toString());
+                }
+            }
+        } else if (part) {
+            numbers.push(part);
+        }
+    });
+    
+    return numbers;
+}
+
+window.removeNumber = async function(numIndex) {
+    const product = products.find(p => p.id === currentProductId);
+    const updatedNumbers = product.numbers.filter((_, i) => i !== numIndex);
+
+    const { error } = await supabase
+        .from('products')
+        .update({ 
+            numbers: updatedNumbers,
+            last_update: new Date().toISOString()
+        })
+        .eq('id', currentProductId);
+
+    if (error) {
+        console.error('Error removing number:', error);
+        return;
+    }
+
+    product.numbers = updatedNumbers;
+    product.last_update = new Date().toISOString();
+    
+    renderNumbers();
+    renderProducts();
+};
+
+window.deleteProduct = async function(event, productId) {
+    event.stopPropagation(); // Остановить всплытие (не открывать модалку)
+    
+    if (!confirm('❓ Точно удалить изделие?')) return;
+
+    const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId)
+        .eq('user_id', currentUser.id); // Двойная проверка
+
+    if (error) {
+        console.error('Error deleting product:', error);
+        return;
+    }
+
+    // Удаляем из local state
+    products = products.filter(p => p.id !== productId);
+    
+    // Обновляем список
+    renderProducts();
+};
+
+function renderNumbers() {
+    const list = document.getElementById('numbersList');
+    const product = products.find(p => p.id === currentProductId);
+    
+    if (!product || product.numbers.length === 0) {
+        list.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">Номера не добавлены</p>';
+        return;
+    }
+
+    list.innerHTML = product.numbers.map((num, i) => `
+        <div class="number-tag">
+            ${num}
+            <button class="remove-number" onclick="removeNumber(${i})">×</button>
+        </div>
+    `).join('');
+}
+
+// Event listeners
+document.getElementById('productInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addProduct();
+});
+
+document.getElementById('numberInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addNumber();
+});
+
+document.getElementById('authEmail')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleAuth();
+});
+
+document.getElementById('authPassword')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleAuth();
+});
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+}
+
+// Realtime setup
+function setupRealtime() {
+    if (!currentUser) return;
+    
+    if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel);
+    }
+
+    console.log('🔌 Подключаю реалтайм для user:', currentUser.id);
+
+    realtimeChannel = supabase
+        .channel('products-changes')
+        .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'products', filter: `user_id=eq.${currentUser.id}` },
+            (payload) => {
+                console.log('📡 Realtime событие:', payload);
+                loadProducts();
+            }
+        )
+        .subscribe(status => {
+            console.log('📶 Статус подписки:', status);
+        });
+}
+
+// Глобальные функции
+window.addProduct = addProduct;
+window.addNumber = addNumber;
+window.removeNumber = removeNumber;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.handleAuth = handleAuth;
+window.handleLogout = handleLogout;
+window.toggleAuthMode = toggleAuthMode;
+
+// Запуск
+init();
+</script>
+</html>
