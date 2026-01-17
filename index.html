@@ -6,19 +6,21 @@
     <meta name="theme-color" content="#1e293b">
     <title>Учёт изделий</title>
     <link rel="manifest" href="./manifest.json">
-    <style>
+            <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Убираем синее нажатие на мобилках */
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 15px;
             color: #1e293b;
+            font-size: 16px;
         }
 
         .container {
@@ -26,92 +28,72 @@
             margin: 0 auto;
         }
 
+        /* HEADER */
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
 
         .header h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .auth-container {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .auth-title {
             font-size: 24px;
             font-weight: 600;
-            margin-bottom: 20px;
-            text-align: center;
         }
 
-        .input-section {
+        /* AUTH & INPUT CARDS */
+        .auth-container, .input-section, .user-info {
             background: white;
             border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .auth-title {
+            font-size: 22px;
+            font-weight: 600;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         .input-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .input-full {
-            width: 100%;
-            margin-bottom: 12px;
         }
 
         input {
             flex: 1;
-            padding: 14px 16px;
+            padding: 12px;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 16px; /* Важно для iOS, чтобы не зумил */
+            outline: none;
             transition: all 0.3s;
         }
 
         input:focus {
-            outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         button {
-            padding: 14px 24px;
+            padding: 12px 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
             white-space: nowrap;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.1s;
         }
 
         button:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
 
         button:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
         .btn-secondary {
@@ -120,47 +102,112 @@
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: #ef4444;
+        }
+
+        /* MAIN SCREEN LAYOUT (Flexbox Magic) */
+        #mainScreen {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: calc(100vh - 70px); /* Высота экрана минус хедер */
+            overflow: hidden; /* Скрываем скролл у основного контейнера */
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            flex-shrink: 0; /* Не сжимается */
+        }
+
+        .user-email {
+            color: #64748b;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* SCROLLABLE LIST */
+        .products-wrapper {
+            flex: 1;
+            overflow-y: auto; /* Скролл только здесь */
+            padding-bottom: 20px;
+            -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
         }
 
         .products-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            padding: 5px; /* Чуть воздуха по бокам */
         }
 
         .product-item {
             background: white;
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 14px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
         }
 
-        .product-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        .product-item:active {
+            background-color: #f8fafc;
         }
 
         .product-name {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: #1e293b;
+            padding-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .product-count {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 6px 16px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
+            margin-right: 8px;
+            flex-shrink: 0;
         }
 
+        .delete-product-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        /* BOTTOM INPUT BAR */
+        .input-section {
+            margin-bottom: 0;
+            padding: 15px;
+            border-radius: 16px 16px 0 0; /* Плоский низ для плотности */
+            flex-shrink: 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -170,12 +217,7 @@
             height: 100%;
             background: rgba(0,0,0,0.5);
             z-index: 1000;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            backdrop-filter: blur(4px);
         }
 
         .modal-content {
@@ -184,62 +226,63 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            border-radius: 16px;
-            padding: 24px;
-            width: 90%;
+            border-radius: 20px;
+            padding: 20px;
+            width: 95%;
             max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translate(-50%, -40%);
-                opacity: 0;
-            }
-            to {
-                transform: translate(-50%, -50%);
-                opacity: 1;
-            }
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .modal-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 600;
             color: #1e293b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 80%;
         }
 
         .close-btn {
             background: #f1f5f9;
             color: #64748b;
-            padding: 8px 16px;
-            font-size: 14px;
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 6px;
+            margin-bottom: 15px;
         }
 
         .numbers-list {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-top: 16px;
-            padding: 16px;
+            padding: 15px;
             background: #f8fafc;
             border-radius: 12px;
-            min-height: 60px;
+            min-height: 80px;
+            overflow-y: auto;
+            max-height: 40vh;
         }
 
         .number-tag {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 8px 14px;
-            border-radius: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 14px;
             font-weight: 600;
             display: flex;
@@ -248,75 +291,25 @@
         }
 
         .remove-number {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.25);
             border: none;
             color: white;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 12px;
-            padding: 0;
+            font-size: 14px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justifyjustify-content: center;
+            padding: 0;
         }
 
-        .hint {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: 8px;
-        }
-
+        /* STATES */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
             color: white;
-        }
-
-        .empty-state p {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-
-        .user-info {
-            background: white;
-            border-radius: 12px;
-            padding: 12px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .user-email {
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .logout-btn {
-            background: #ef4444;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-
-        .error-message {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-        .success-message {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 14px;
         }
 
         .loading {
@@ -325,46 +318,37 @@
             padding: 40px;
         }
 
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            text-align: center;
+        }
+
         .auth-toggle {
             text-align: center;
-            margin-top: 16px;
-            color: #64748b;
+            margin-top: 15px;
             font-size: 14px;
-        }
-
-        .auth-toggle a {
-            color: #667eea;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .auth-toggle a:hover {
-            text-decoration: underline;
+            color: #64748b;
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
-        .delete-product-btn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .product-item {
-            position: relative; /* Важно для позиционирования кнопки */
-}
-
-    </style>
+        </style>
 </head>
 <body>
     <div class="container">
@@ -396,24 +380,31 @@
             </div>
         </div>
 
-        <!-- Главный экран -->
+                <!-- Главный экран -->
         <div id="mainScreen" class="hidden">
+            <!-- Инфа о юзере -->
             <div class="user-info">
-                <div class="user-email" id="userEmail"></div>
+                <div class="user-email" id="userEmail">user@example.com</div>
                 <button class="logout-btn" onclick="handleLogout()">Выйти</button>
             </div>
 
-            <div class="input-section">
-                <div class="input-group">
-                    <input type="text" id="productInput" placeholder="Название изделия (например: ХТ04)">
-                    <button onclick="addProduct()">Добавить</button>
+            <!-- Список товаров (Обёртка для скролла) -->
+            <div class="products-wrapper">
+                <div class="products-list" id="productsList">
+                    <!-- Сюда JS пихает товары -->
+                </div>
+                
+                <div class="empty-state hidden" id="emptyState">
+                    <p>Добавьте первое изделие</p>
                 </div>
             </div>
 
-            <div class="products-list" id="productsList"></div>
-
-            <div class="empty-state hidden" id="emptyState">
-                <p>Добавьте первое изделие</p>
+            <!-- Поле ввода (Теперь всегда внизу) -->
+            <div class="input-section">
+                <div class="input-group">
+                    <input type="text" id="productInput" placeholder="Название (напр. ХТ04)" autocomplete="off">
+                    <button onclick="addProduct()">Добавить</button>
+                </div>
             </div>
         </div>
 
