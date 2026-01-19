@@ -6,14 +6,13 @@
     <meta name="theme-color" content="#1e293b">
     <title>Учёт изделий</title>
     <link rel="manifest" href="./manifest.json">
-            <style>
+    <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* Убираем синее нажатие на мобилках */
+            -webkit-tap-highlight-color: transparent;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -22,56 +21,51 @@
             color: #1e293b;
             font-size: 16px;
         }
-
         .container {
             max-width: 600px;
             margin: 0 auto;
+            height: 100%;
         }
-
-        /* HEADER */
         .header {
             text-align: center;
             color: white;
             margin-bottom: 15px;
         }
-
         .header h1 {
             font-size: 24px;
             font-weight: 600;
         }
-
-        /* AUTH & INPUT CARDS */
-        .auth-container, .input-section, .user-info {
+        .auth-container, .input-section, .user-info, .summary-container {
             background: white;
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
         .auth-title {
             font-size: 22px;
             font-weight: 600;
             margin-bottom: 20px;
             text-align: center;
         }
-
         .input-group {
             display: flex;
             gap: 10px;
         }
-
         input {
             flex: 1;
             padding: 12px;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
-            font-size: 16px; /* Важно для iOS, чтобы не зумил */
+            font-size: 16px;
             outline: none;
             transition: all 0.3s;
         }
-
         input:focus {
             border-color: #667eea;
+        }
+        /* Добавил: автоматический верхний регистр для полей ввода изделий */
+        #productInput, #numberInput {
+            text-transform: uppercase;
         }
 
         button {
@@ -86,32 +80,50 @@
             white-space: nowrap;
             transition: transform 0.1s;
         }
-
         button:active {
             transform: scale(0.98);
         }
-
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-
         .btn-secondary {
             background: #f1f5f9;
             color: #64748b;
         }
-
         .btn-danger {
             background: #ef4444;
         }
-
-        /* MAIN SCREEN LAYOUT (Flexbox Magic) */
         #mainScreen {
             display: flex;
             flex-direction: column;
             gap: 15px;
-            height: calc(100vh - 70px); /* Высота экрана минус хедер */
-            overflow: hidden; /* Скрываем скролл у основного контейнера */
+            height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+        /* Стили для Summary Screen */
+        #summaryScreen {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 30px); /* height minus body padding */
+            overflow: hidden;
+        }
+        .summary-top-panel {
+            flex-shrink: 0;
+            padding-bottom: 15px;
+        }
+        .summary-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .summary-actions button {
+            flex: 1;
+        }
+        .summary-scroll-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 20px;
         }
 
         .user-info {
@@ -119,9 +131,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 16px;
-            flex-shrink: 0; /* Не сжимается */
+            flex-shrink: 0;
         }
-
         .user-email {
             color: #64748b;
             font-size: 14px;
@@ -129,22 +140,18 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
-        /* SCROLLABLE LIST */
         .products-wrapper {
             flex: 1;
-            overflow-y: auto; /* Скролл только здесь */
+            overflow-y: auto;
             padding-bottom: 20px;
-            -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+            -webkit-overflow-scrolling: touch;
         }
-
         .products-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding: 5px; /* Чуть воздуха по бокам */
+            padding: 5px;
         }
-
         .product-item {
             background: white;
             border-radius: 12px;
@@ -156,11 +163,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             transition: transform 0.2s;
         }
-
         .product-item:active {
             background-color: #f8fafc;
         }
-
         .product-name {
             font-size: 16px;
             font-weight: 600;
@@ -170,7 +175,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
         .product-count {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -181,7 +185,6 @@
             margin-right: 8px;
             flex-shrink: 0;
         }
-
         .delete-product-btn {
             background: #ef4444;
             color: white;
@@ -197,17 +200,13 @@
             padding: 0;
             flex-shrink: 0;
         }
-
-        /* BOTTOM INPUT BAR */
         .input-section {
             margin-bottom: 0;
             padding: 15px;
-            border-radius: 16px 16px 0 0; /* Плоский низ для плотности */
+            border-radius: 16px 16px 0 0;
             flex-shrink: 0;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
         }
-
-        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -219,7 +218,6 @@
             z-index: 1000;
             backdrop-filter: blur(4px);
         }
-
         .modal-content {
             position: absolute;
             top: 50%;
@@ -234,14 +232,12 @@
             display: flex;
             flex-direction: column;
         }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-
         .modal-title {
             font-size: 20px;
             font-weight: 600;
@@ -251,21 +247,18 @@
             white-space: nowrap;
             max-width: 80%;
         }
-
         .close-btn {
             background: #f1f5f9;
             color: #64748b;
             padding: 6px 14px;
             font-size: 13px;
         }
-
         .hint {
             font-size: 12px;
             color: #94a3b8;
             margin-top: 6px;
             margin-bottom: 15px;
         }
-
         .numbers-list {
             display: flex;
             flex-wrap: wrap;
@@ -277,7 +270,6 @@
             overflow-y: auto;
             max-height: 40vh;
         }
-
         .number-tag {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -289,7 +281,6 @@
             align-items: center;
             gap: 8px;
         }
-
         .remove-number {
             background: rgba(255,255,255,0.25);
             border: none;
@@ -304,20 +295,16 @@
             justify-content: center;
             padding: 0;
         }
-
-        /* STATES */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
             color: white;
         }
-
         .loading {
             text-align: center;
             color: white;
             padding: 40px;
         }
-
         .error-message {
             background: #fee2e2;
             color: #991b1b;
@@ -327,7 +314,6 @@
             font-size: 13px;
             text-align: center;
         }
-
         .success-message {
             background: #d1fae5;
             color: #065f46;
@@ -337,18 +323,25 @@
             font-size: 13px;
             text-align: center;
         }
-
         .auth-toggle {
             text-align: center;
             margin-top: 15px;
             font-size: 14px;
             color: #64748b;
         }
-
         .hidden {
             display: none !important;
         }
-        </style>
+        #jsonOutput {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -356,23 +349,18 @@
             <h1>⚙️ Учёт изделий</h1>
         </div>
 
-        <!-- Загрузка -->
         <div id="loadingScreen" class="loading">
             <p>Загрузка...</p>
         </div>
 
-        <!-- Экран авторизации -->
         <div id="authScreen" class="hidden">
             <div class="auth-container">
                 <div class="auth-title" id="authTitle">Вход</div>
                 <div id="authError"></div>
                 <div id="authSuccess"></div>
-                
                 <input type="email" id="authEmail" class="input-full" placeholder="Email" autocomplete="email">
                 <input type="password" id="authPassword" class="input-full" placeholder="Пароль" autocomplete="current-password">
-                
                 <button id="authSubmitBtn" onclick="handleAuth()" style="width: 100%; margin-bottom: 12px;">Войти</button>
-                
                 <div class="auth-toggle">
                     <span id="authToggleText">Нет аккаунта?</span>
                     <a onclick="toggleAuthMode()">Зарегистрироваться</a>
@@ -380,433 +368,398 @@
             </div>
         </div>
 
-                <!-- Главный экран -->
         <div id="mainScreen" class="hidden">
-            <!-- Инфа о юзере -->
             <div class="user-info">
                 <div class="user-email" id="userEmail">user@example.com</div>
                 <button class="logout-btn" onclick="handleLogout()">Выйти</button>
             </div>
-
-            <!-- Список товаров (Обёртка для скролла) -->
             <div class="products-wrapper">
-                <div class="products-list" id="productsList">
-                    <!-- Сюда JS пихает товары -->
-                </div>
-                
+                <div class="products-list" id="productsList"></div>
                 <div class="empty-state hidden" id="emptyState">
                     <p>Добавьте первое изделие</p>
                 </div>
             </div>
-
-            <!-- Поле ввода (Теперь всегда внизу) -->
             <div class="input-section">
                 <div class="input-group">
                     <input type="text" id="productInput" placeholder="Название (напр. ХТ04)" autocomplete="off">
                     <button onclick="addProduct()">Добавить</button>
                 </div>
+                <button onclick="showSummaryScreen()" style="width: 100%; margin-top: 10px;">📋 Сводный список</button>
             </div>
         </div>
 
-        <!-- Модальное окно -->
+        <div id="summaryScreen" class="hidden">
+            <div class="summary-top-panel">
+                <div class="header">
+                    <h1>📋 Сводный список</h1>
+                </div>
+                <div class="summary-actions">
+                    <button onclick="downloadJSON()">💾 Скачать JSON</button>
+                    <button onclick="backToMain()" class="btn-secondary">⬅ Назад</button>
+                </div>
+            </div>
+            <div class="summary-scroll-wrapper">
+                <div class="summary-container">
+                    <pre id="jsonOutput"></pre>
+                </div>
+            </div>
+        </div>
+
         <div class="modal" id="modal">
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="modal-title" id="modalTitle"></div>
                     <button class="close-btn" onclick="closeModal()">Назад</button>
                 </div>
-                
                 <div class="input-group">
                     <input type="text" id="numberInput" placeholder="Номер изделия">
                     <button onclick="addNumber()">Добавить</button>
                 </div>
                 <p class="hint">Для добавления нескольких: 55, 56, 57 или 55-60</p>
-                
                 <div class="numbers-list" id="numbersList"></div>
             </div>
         </div>
     </div>
 
     <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-// Supabase конфигурация
-const SUPABASE_URL = 'https://ntsdwbrdxnexgjjekfqk.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2R3YnJkeG5leGdqamVrZnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjQ0MDYsImV4cCI6MjA4NDIwMDQwNn0.5ZrQNwFD-m4Rq4lKzfhPEGbw8BXhIoYViC-nJORosyQ';
+        const SUPABASE_URL = 'https://ntsdwbrdxnexgjjekfqk.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2R3YnJkeG5leGdqamVrZnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjQ0MDYsImV4cCI6MjA4NDIwMDQwNn0.5ZrQNwFD-m4Rq4lKzfhPEGbw8BXhIoYViC-nJORosyQ';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        let currentUser = null;
+        let products = [];
+        let currentProductId = null;
+        let isLoginMode = true;
+        let realtimeChannel = null;
 
-let currentUser = null;
-let products = [];
-let currentProductId = null;
-let isLoginMode = true;
-let realtimeChannel = null;
-
-// Проверка авторизации при загрузке
-async function init() {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (user) {
-        currentUser = user;
-        showMainScreen();
-        await loadProducts();
-    } else {
-        showAuthScreen();
-    }
-    
-    document.getElementById('loadingScreen').classList.add('hidden');
-}
-
-// Подписка на изменения авторизации
-supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN') {
-        currentUser = session.user;
-        showMainScreen();
-        loadProducts();
-    } else if (event === 'SIGNED_OUT') {
-        currentUser = null;
-        products = [];
-        showAuthScreen();
-    }
-});
-
-function showAuthScreen() {
-    document.getElementById('authScreen').classList.remove('hidden');
-    document.getElementById('mainScreen').classList.add('hidden');
-}
-
-function showMainScreen() {
-    document.getElementById('authScreen').classList.add('hidden');
-    document.getElementById('mainScreen').classList.remove('hidden');
-    document.getElementById('userEmail').textContent = currentUser.email;
-    setupRealtime();
-}
-
-window.toggleAuthMode = function() {
-    isLoginMode = !isLoginMode;
-    const title = document.getElementById('authTitle');
-    const btn = document.getElementById('authSubmitBtn');
-    const toggleText = document.getElementById('authToggleText');
-    
-    if (isLoginMode) {
-        title.textContent = 'Вход';
-        btn.textContent = 'Войти';
-        toggleText.textContent = 'Нет аккаунта?';
-    } else {
-        title.textContent = 'Регистрация';
-        btn.textContent = 'Зарегистрироваться';
-        toggleText.textContent = 'Уже есть аккаунт?';
-    }
-    
-    document.getElementById('authError').innerHTML = '';
-    document.getElementById('authSuccess').innerHTML = '';
-};
-
-window.handleAuth = async function() {
-    const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPassword').value;
-    const errorDiv = document.getElementById('authError');
-    const successDiv = document.getElementById('authSuccess');
-    
-    errorDiv.innerHTML = '';
-    successDiv.innerHTML = '';
-    
-    if (!email || !password) {
-        errorDiv.innerHTML = '<div class="error-message">Заполните все поля</div>';
-        return;
-    }
-
-    const btn = document.getElementById('authSubmitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Загрузка...';
-
-    try {
-        if (isLoginMode) {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) throw error;
-        } else {
-            const { error } = await supabase.auth.signUp({ email, password });
-            if (error) throw error;
-            successDiv.innerHTML = '<div class="success-message">Регистрация успешна! Проверьте email для подтверждения.</div>';
-        }
-    } catch (error) {
-        errorDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
-        btn.disabled = false;
-        btn.textContent = isLoginMode ? 'Войти' : 'Зарегистрироваться';
-    }
-};
-
-window.handleLogout = async function() {
-    await supabase.auth.signOut();
-};
-
-async function loadProducts() {
-    const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        console.error('Error loading products:', error);
-        return;
-    }
-
-    products = data || [];
-    renderProducts();
-}
-
-async function cleanOldProducts() {
-    const twoMonthsAgo = Date.now() - (60 * 24 * 60 * 60 * 1000);
-    const oldProducts = products.filter(p => new Date(p.last_update).getTime() < twoMonthsAgo);
-    
-    for (const product of oldProducts) {
-        await supabase.from('products').delete().eq('id', product.id);
-    }
-    
-    products = products.filter(p => new Date(p.last_update).getTime() >= twoMonthsAgo);
-}
-
-window.addProduct = async function() {
-    const input = document.getElementById('productInput');
-    const name = input.value.trim();
-    
-    if (!name) return;
-
-    const { data, error } = await supabase
-        .from('products')
-        .insert({
-            user_id: currentUser.id,
-            name: name,
-            numbers: [],
-            last_update: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-    if (error) {
-        console.error('Error adding product:', error);
-        return;
-    }
-
-    products.unshift(data);
-    input.value = '';
-    renderProducts();
-};
-
-function renderProducts() {
-    const list = document.getElementById('productsList');
-    const empty = document.getElementById('emptyState');
-
-    if (products.length === 0) {
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-    }
-
-    list.innerHTML = products.map(p => `
-    <div class="product-item" onclick="openModal(${p.id})">
-        <div class="product-name">${p.name}</div>
-        <div style="display: flex; align-items: center;">
-            <div class="product-count">${p.numbers.length} шт</div>
-            <button class="delete-product-btn" onclick="deleteProduct(event, ${p.id})">🗑️</button>
-        </div>
-    </div>
-`).join('');
-}
-
-window.openModal = function(productId) {
-    currentProductId = productId;
-    const product = products.find(p => p.id === productId);
-    
-    if (!product) {
-        console.error('Продукт не найден:', productId);
-        return;
-    }
-    
-    document.getElementById('modalTitle').textContent = product.name;
-    document.getElementById('modal').style.display = 'block';
-    renderNumbers();
-};
-
-window.closeModal = function() {
-    document.getElementById('modal').style.display = 'none';
-    document.getElementById('numberInput').value = '';
-    currentProductId = null;
-};
-
-window.addNumber = async function() {
-    const input = document.getElementById('numberInput');
-    const value = input.value.trim();
-    
-    if (!value || !currentProductId) return;
-
-    const product = products.find(p => p.id === currentProductId);
-    const newNumbers = parseNumbers(value);
-    const updatedNumbers = [...product.numbers, ...newNumbers];
-
-    const { error } = await supabase
-        .from('products')
-        .update({ 
-            numbers: updatedNumbers,
-            last_update: new Date().toISOString()
-        })
-        .eq('id', currentProductId);
-
-    if (error) {
-        console.error('Error adding number:', error);
-        return;
-    }
-
-    product.numbers = updatedNumbers;
-    product.last_update = new Date().toISOString();
-    
-    input.value = '';
-    renderNumbers();
-    renderProducts();
-};
-
-function parseNumbers(input) {
-    const numbers = [];
-    const parts = input.split(',').map(s => s.trim());
-    
-    parts.forEach(part => {
-        if (part.includes('-')) {
-            const [start, end] = part.split('-').map(s => parseInt(s.trim()));
-            if (!isNaN(start) && !isNaN(end) && start <= end) {
-                for (let i = start; i <= end; i++) {
-                    numbers.push(i.toString());
-                }
+        async function init() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                currentUser = user;
+                showMainScreen();
+                await loadProducts();
+            } else {
+                showAuthScreen();
             }
-        } else if (part) {
-            numbers.push(part);
+            document.getElementById('loadingScreen').classList.add('hidden');
         }
-    });
-    
-    return numbers;
-}
 
-window.removeNumber = async function(numIndex) {
-    const product = products.find(p => p.id === currentProductId);
-    const updatedNumbers = product.numbers.filter((_, i) => i !== numIndex);
-
-    const { error } = await supabase
-        .from('products')
-        .update({ 
-            numbers: updatedNumbers,
-            last_update: new Date().toISOString()
-        })
-        .eq('id', currentProductId);
-
-    if (error) {
-        console.error('Error removing number:', error);
-        return;
-    }
-
-    product.numbers = updatedNumbers;
-    product.last_update = new Date().toISOString();
-    
-    renderNumbers();
-    renderProducts();
-};
-
-window.deleteProduct = async function(event, productId) {
-    event.stopPropagation(); // Остановить всплытие (не открывать модалку)
-    
-    if (!confirm('❓ Точно удалить изделие?')) return;
-
-    const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId)
-        .eq('user_id', currentUser.id); // Двойная проверка
-
-    if (error) {
-        console.error('Error deleting product:', error);
-        return;
-    }
-
-    // Удаляем из local state
-    products = products.filter(p => p.id !== productId);
-    
-    // Обновляем список
-    renderProducts();
-};
-
-function renderNumbers() {
-    const list = document.getElementById('numbersList');
-    const product = products.find(p => p.id === currentProductId);
-    
-    if (!product || product.numbers.length === 0) {
-        list.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">Номера не добавлены</p>';
-        return;
-    }
-
-    list.innerHTML = product.numbers.map((num, i) => `
-        <div class="number-tag">
-            ${num}
-            <button class="remove-number" onclick="removeNumber(${i})">×</button>
-        </div>
-    `).join('');
-}
-
-// Event listeners
-document.getElementById('productInput')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addProduct();
-});
-
-document.getElementById('numberInput')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addNumber();
-});
-
-document.getElementById('authEmail')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleAuth();
-});
-
-document.getElementById('authPassword')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleAuth();
-});
-
-// Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-}
-
-// Realtime setup
-function setupRealtime() {
-    if (!currentUser) return;
-    
-    if (realtimeChannel) {
-        supabase.removeChannel(realtimeChannel);
-    }
-
-    console.log('🔌 Подключаю реалтайм для user:', currentUser.id);
-
-    realtimeChannel = supabase
-        .channel('products-changes')
-        .on('postgres_changes', 
-            { event: '*', schema: 'public', table: 'products', filter: `user_id=eq.${currentUser.id}` },
-            (payload) => {
-                console.log('📡 Realtime событие:', payload);
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN') {
+                currentUser = session.user;
+                showMainScreen();
                 loadProducts();
+            } else if (event === 'SIGNED_OUT') {
+                currentUser = null;
+                products = [];
+                showAuthScreen();
             }
-        )
-        .subscribe(status => {
-            console.log('📶 Статус подписки:', status);
         });
-}
 
-// Глобальные функции
-window.addProduct = addProduct;
-window.addNumber = addNumber;
-window.removeNumber = removeNumber;
-window.openModal = openModal;
-window.closeModal = closeModal;
-window.handleAuth = handleAuth;
-window.handleLogout = handleLogout;
-window.toggleAuthMode = toggleAuthMode;
+        function showAuthScreen() {
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('mainScreen').classList.add('hidden');
+            document.getElementById('summaryScreen').classList.add('hidden');
+        }
 
-// Запуск
-init();
-</script>
+        function showMainScreen() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.remove('hidden');
+            document.getElementById('summaryScreen').classList.add('hidden');
+            document.getElementById('userEmail').textContent = currentUser.email;
+            setupRealtime();
+        }
+
+        window.toggleAuthMode = function () {
+            isLoginMode = !isLoginMode;
+            const title = document.getElementById('authTitle');
+            const btn = document.getElementById('authSubmitBtn');
+            const toggleText = document.getElementById('authToggleText');
+            if (isLoginMode) {
+                title.textContent = 'Вход';
+                btn.textContent = 'Войти';
+                toggleText.textContent = 'Нет аккаунта?';
+            } else {
+                title.textContent = 'Регистрация';
+                btn.textContent = 'Зарегистрироваться';
+                toggleText.textContent = 'Уже есть аккаунт?';
+            }
+            document.getElementById('authError').innerHTML = '';
+            document.getElementById('authSuccess').innerHTML = '';
+        };
+
+        window.handleAuth = async function () {
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const errorDiv = document.getElementById('authError');
+            const successDiv = document.getElementById('authSuccess');
+            errorDiv.innerHTML = '';
+            successDiv.innerHTML = '';
+            if (!email || !password) {
+                errorDiv.innerHTML = '<div class="error-message">Заполните все поля</div>';
+                return;
+            }
+            const btn = document.getElementById('authSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Загрузка...';
+            try {
+                if (isLoginMode) {
+                    const { error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+                    successDiv.innerHTML = '<div class="success-message">Регистрация успешна! Проверьте email для подтверждения.</div>';
+                }
+            } catch (error) {
+                errorDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
+                btn.disabled = false;
+                btn.textContent = isLoginMode ? 'Войти' : 'Зарегистрироваться';
+            }
+        };
+
+        window.handleLogout = async function () {
+            await supabase.auth.signOut();
+        };
+
+        async function loadProducts() {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false });
+            if (error) {
+                console.error('Error loading products:', error);
+                return;
+            }
+            products = data || [];
+            renderProducts();
+        }
+
+        window.addProduct = async function () {
+            const input = document.getElementById('productInput');
+            // Добавил .toUpperCase() для записи большими буквами
+            const name = input.value.trim().toUpperCase();
+            if (!name) return;
+            const { data, error } = await supabase
+                .from('products')
+                .insert({
+                    user_id: currentUser.id,
+                    name: name,
+                    numbers: [],
+                    last_update: new Date().toISOString()
+                })
+                .select()
+                .single();
+            if (error) {
+                console.error('Error adding product:', error);
+                return;
+            }
+            products.unshift(data);
+            input.value = '';
+            renderProducts();
+        };
+
+        function renderProducts() {
+            const list = document.getElementById('productsList');
+            const empty = document.getElementById('emptyState');
+            if (products.length === 0) {
+                list.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+            list.innerHTML = products.map(p => `
+                <div class="product-item" onclick="openModal(${p.id})">
+                    <div class="product-name">${p.name}</div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="product-count">${p.numbers.length} шт</div>
+                        <button class="delete-product-btn" onclick="deleteProduct(event, ${p.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+            empty.classList.add('hidden');
+        }
+
+        window.openModal = function (productId) {
+            currentProductId = productId;
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            document.getElementById('modalTitle').textContent = product.name;
+            document.getElementById('modal').style.display = 'block';
+            renderNumbers();
+        };
+
+        window.closeModal = function () {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('numberInput').value = '';
+            currentProductId = null;
+        };
+
+        window.addNumber = async function () {
+            const input = document.getElementById('numberInput');
+            // Добавил .toUpperCase() для записи большими буквами
+            const value = input.value.trim().toUpperCase();
+            if (!value || !currentProductId) return;
+            const product = products.find(p => p.id === currentProductId);
+            const newNumbers = parseNumbers(value);
+            const updatedNumbers = [...product.numbers, ...newNumbers];
+            const { error } = await supabase
+                .from('products')
+                .update({ numbers: updatedNumbers, last_update: new Date().toISOString() })
+                .eq('id', currentProductId);
+            if (error) {
+                console.error('Error adding number:', error);
+                return;
+            }
+            product.numbers = updatedNumbers;
+            product.last_update = new Date().toISOString();
+            input.value = '';
+            renderNumbers();
+            renderProducts();
+        };
+
+        function parseNumbers(input) {
+            const numbers = [];
+            const parts = input.split(',').map(s => s.trim());
+            parts.forEach(part => {
+                if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(s => parseInt(s.trim()));
+                    if (!isNaN(start) && !isNaN(end) && start <= end) {
+                        for (let i = start; i <= end; i++) numbers.push(i.toString().toUpperCase());
+                    }
+                } else if (part) {
+                    numbers.push(part);
+                }
+            });
+            return numbers;
+        }
+
+        window.removeNumber = async function (numIndex) {
+            const product = products.find(p => p.id === currentProductId);
+            const updatedNumbers = product.numbers.filter((_, i) => i !== numIndex);
+            const { error } = await supabase
+                .from('products')
+                .update({ numbers: updatedNumbers, last_update: new Date().toISOString() })
+                .eq('id', currentProductId);
+            if (error) {
+                console.error('Error removing number:', error);
+                return;
+            }
+            product.numbers = updatedNumbers;
+            product.last_update = new Date().toISOString();
+            renderNumbers();
+            renderProducts();
+        };
+
+        window.deleteProduct = async function (event, productId) {
+            event.stopPropagation();
+            if (!confirm('❓ Точно удалить изделие?')) return;
+            const { error } = await supabase
+                .from('products')
+                .delete()
+                .eq('id', productId)
+                .eq('user_id', currentUser.id);
+            if (error) {
+                console.error('Error deleting product:', error);
+                return;
+            }
+            products = products.filter(p => p.id !== productId);
+            renderProducts();
+        };
+
+        function renderNumbers() {
+            const list = document.getElementById('numbersList');
+            const product = products.find(p => p.id === currentProductId);
+            if (!product || product.numbers.length === 0) {
+                list.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">Номера не добавлены</p>';
+                return;
+            }
+            list.innerHTML = product.numbers.map((num, i) => `
+                <div class="number-tag">
+                    ${num}
+                    <button class="remove-number" onclick="removeNumber(${i})">×</button>
+                </div>
+            `).join('');
+        }
+
+        window.showSummaryScreen = function () {
+            const summary = {};
+            products.forEach(p => {
+                if (!summary[p.name]) summary[p.name] = {};
+                p.numbers.forEach(num => {
+                    const date = new Date(p.last_update).toLocaleDateString('ru-RU');
+                    summary[p.name][num] = date;
+                });
+            });
+            // Форматирование JSON в столбик
+            document.getElementById('jsonOutput').textContent = JSON.stringify(summary, null, 2);
+            document.getElementById('mainScreen').classList.add('hidden');
+            document.getElementById('summaryScreen').classList.remove('hidden');
+        };
+
+        window.backToMain = function () {
+            document.getElementById('summaryScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.remove('hidden');
+        };
+
+        window.downloadJSON = function () {
+            const summary = {};
+            products.forEach(p => {
+                if (!summary[p.name]) summary[p.name] = {};
+                p.numbers.forEach(num => {
+                    const date = new Date(p.last_update).toLocaleDateString('ru-RU');
+                    summary[p.name][num] = date;
+                });
+            });
+            // Форматирование JSON в столбик
+            const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `summary_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        document.getElementById('productInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addProduct();
+        });
+
+        document.getElementById('numberInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addNumber();
+        });
+
+        document.getElementById('authEmail')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAuth();
+        });
+
+        document.getElementById('authPassword')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAuth();
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+
+        function setupRealtime() {
+            if (!currentUser) return;
+            if (realtimeChannel) {
+                supabase.removeChannel(realtimeChannel);
+            }
+            realtimeChannel = supabase
+                .channel('products-changes')
+                .on('postgres_changes',
+                    { event: '*', schema: 'public', table: 'products', filter: `user_id=eq.${currentUser.id}` },
+                    (payload) => {
+                        loadProducts();
+                    }
+                )
+                .subscribe();
+        }
+
+        init();
+    </script>
+</body>
 </html>
