@@ -299,6 +299,9 @@
         border-radius: 16px 16px 0 0;
         border-bottom: none;
         box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+        /* Добавил position: relative, чтобы подсказки были привязаны к этой панели, но выходили за её пределы */
+        position: relative; 
+        z-index: 10; /* Базовый z-index */
     }
     
     .modal {
@@ -498,12 +501,66 @@
             border-radius: 0;
         }
     }
+
+    /* --- СТИЛИ ДЛЯ ПОИСКА (ИСПРАВЛЕННЫЕ) --- */
+    .input-wrapper {
+        position: relative; 
+        width: 100%;
+    }
+
+    .suggestions-box {
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        /* БОЛЬШОЙ Z-INDEX, ЧТОБЫ БЫЛО НАД ВСЕМ, КРОМЕ МОДАЛКИ */
+        z-index: 500; 
+        max-height: 250px;
+        overflow-y: auto;
+        display: none; 
+        margin-bottom: 4px;
+    }
+
+    .suggestion-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        font-size: 15px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.1s;
+    }
+
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+        background: #f8fafc;
+        color: #2563eb;
+    }
+    
+    .suggestion-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .suggestion-count {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+    /* --------------------------------------------------- */
 </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>⚙️ Учёт изделий</h1>
+            <h1>Учёт изделий</h1>
         </div>
 
         <div id="loadingScreen" class="loading">
@@ -515,8 +572,8 @@
                 <div class="auth-title" id="authTitle">Вход</div>
                 <div id="authError"></div>
                 <div id="authSuccess"></div>
-                <input type="email" id="authEmail" class="input-full" placeholder="Email" autocomplete="email">
-                <input type="password" id="authPassword" class="input-full" placeholder="Пароль" autocomplete="current-password">
+                <input type="email" id="authEmail" class="input-full" placeholder="Email" autocomplete="email" style="width:100%">
+                <input type="password" id="authPassword" class="input-full" placeholder="Пароль" autocomplete="current-password" style="width:100%">
                 <button id="authSubmitBtn" onclick="handleAuth()" style="width: 100%; margin-bottom: 12px;">Войти</button>
                 <div class="auth-toggle">
                     <span id="authToggleText">Нет аккаунта?</span>
@@ -528,20 +585,28 @@
         <div id="mainScreen" class="hidden">
             <div class="user-info">
                 <div class="user-email" id="userEmail">user@example.com</div>
-                <button class="logout-btn" onclick="handleLogout()">Выйти</button>
+                <button class="logout-btn btn-danger" onclick="handleLogout()">Выйти</button>
             </div>
+            
             <div class="products-wrapper">
                 <div class="products-list" id="productsList"></div>
                 <div class="empty-state hidden" id="emptyState">
                     <p>Добавьте первое изделие</p>
                 </div>
             </div>
+
             <div class="input-section">
-                <div class="input-group">
-                    <input type="text" id="productInput" placeholder="Название (напр. ХТ04)" autocomplete="off">
-                    <button onclick="addProduct()">Добавить</button>
+                <!-- Обертка для поиска -->
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <input type="text" id="productInput" placeholder="Название (напр. ХТ04)" autocomplete="off">
+                        <button onclick="addProduct()">Добавить</button>
+                    </div>
+                    <!-- Выпадающий список -->
+                    <div id="suggestionsBox" class="suggestions-box"></div>
                 </div>
-                <button onclick="showSummaryScreen()" style="width: 100%; margin-top: 10px;">📋 Сводный список</button>
+
+                <button onclick="showSummaryScreen()" class="btn-secondary" style="width: 100%; margin-top: 10px;">📋 Сводный список</button>
             </div>
         </div>
 
@@ -590,6 +655,10 @@
         let currentProductId = null;
         let isLoginMode = true;
         let realtimeChannel = null;
+
+        // --- Элементы поиска ---
+        const productInput = document.getElementById('productInput');
+        const suggestionsBox = document.getElementById('suggestionsBox');
 
         async function init() {
             const { data: { user } } = await supabase.auth.getUser();
@@ -697,8 +766,18 @@
 
         window.addProduct = async function () {
             const input = document.getElementById('productInput');
-            const name = input.value.trim();
+            const name = input.value.trim().toUpperCase(); 
             if (!name) return;
+
+            // Проверка на дубликаты перед добавлением
+            const exists = products.some(p => p.name.toLowerCase() === name.toLowerCase());
+            if (exists) {
+                alert('Изделие с таким названием уже существует! Выберите его из списка подсказок.');
+                input.value = '';
+                closeSuggestions();
+                return;
+            }
+
             const { data, error } = await supabase
                 .from('products')
                 .insert({
@@ -715,6 +794,7 @@
             }
             products.unshift(data);
             input.value = '';
+            closeSuggestions();
             renderProducts();
         };
 
@@ -737,6 +817,58 @@
             `).join('');
             empty.classList.add('hidden');
         }
+
+        // --- LOGIC FOR AUTOCOMPLETE ---
+        productInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if (query.length === 0) {
+                closeSuggestions();
+                return;
+            }
+
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query));
+            renderSuggestions(filtered);
+        });
+
+        // Закрываем подсказки при клике вне области
+        document.addEventListener('click', (e) => {
+            // Проверяем, кликнул ли пользователь не в инпут и не в список подсказок
+            if (!productInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                closeSuggestions();
+            }
+        });
+
+        function renderSuggestions(items) {
+            suggestionsBox.innerHTML = '';
+            
+            if (items.length === 0) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            items.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `
+                    <span class="suggestion-name">${p.name}</span>
+                    <span class="suggestion-count">${p.numbers.length} шт</span>
+                `;
+                div.onclick = (e) => {
+                    e.stopPropagation(); // Чтобы не закрылось по document click
+                    openModal(p.id);
+                    productInput.value = '';
+                    closeSuggestions();
+                };
+                suggestionsBox.appendChild(div);
+            });
+
+            suggestionsBox.style.display = 'block';
+        }
+
+        function closeSuggestions() {
+            suggestionsBox.style.display = 'none';
+        }
+        // -----------------------------
 
         window.openModal = function (productId) {
             currentProductId = productId;
