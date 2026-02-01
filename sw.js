@@ -1,18 +1,18 @@
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open('v1').then((cache) => 
-      cache.addAll([
-        './',
-        './index.html',
-        './icon-192.png', // Добавь
-        './icon-512.png'  // Добавь
-      ])
-    )
-  );
-});
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
 
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((response) => response || fetch(e.request))
-  );
-});
+// Кэшируем страницы: сначала сеть, если нет — кэш
+workbox.routing.registerRoute(
+  ({request}) => request.mode === 'navigate',
+  new workbox.strategies.NetworkFirst({ 
+    cacheName: 'pages',
+    networkTimeoutSeconds: 3
+  })
+);
+
+// Кэшируем статику (CSS, JS, иконки): кэш + фоновое обновление
+workbox.routing.registerRoute(
+  ({request}) => ['image', 'style', 'script'].includes(request.destination),
+  new workbox.strategies.StaleWhileRevalidate({ 
+    cacheName: 'assets'
+  })
+);
