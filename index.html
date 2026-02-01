@@ -774,37 +774,36 @@
         renderProducts();
     }
 
-    window.addProduct = async function () {
+        window.addProduct = async function () {
         const input = document.getElementById('productInput');
         const name = input.value.trim().toUpperCase(); 
         if (!name) return;
 
         const exists = products.some(p => p.name.toLowerCase() === name.toLowerCase());
         if (exists) {
-            alert('Изделие с таким названием уже существует! Выберите его из списка подсказок.');
+            alert('Изделие с таким названием уже существует!');
             input.value = '';
             closeSuggestions();
             return;
         }
 
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('products')
             .insert({
                 user_id: currentUser.id,
                 name: name,
                 numbers: [],
                 last_update: new Date().toISOString()
-            })
-            .select()
-            .single();
+            });
+
         if (error) {
             console.error('Error adding product:', error);
             return;
         }
-        products.unshift(data);
+        
         input.value = '';
         closeSuggestions();
-        renderProducts();
+        await loadProducts(); // <-- принудительно обновляем с сервера
     };
 
     function renderProducts() {
@@ -890,26 +889,31 @@
         currentProductId = null;
     };
 
-    window.addNumber = async function () {
+        window.addNumber = async function () {
         const input = document.getElementById('numberInput');
         const value = input.value.trim();
         if (!value || !currentProductId) return;
+        
         const product = products.find(p => p.id === currentProductId);
         const newNumbers = parseNumbers(value);
         const updatedNumbers = [...product.numbers, ...newNumbers];
+        
         const { error } = await supabase
             .from('products')
-            .update({ numbers: updatedNumbers, last_update: new Date().toISOString() })
+            .update({ 
+                numbers: updatedNumbers, 
+                last_update: new Date().toISOString() 
+            })
             .eq('id', currentProductId);
+
         if (error) {
             console.error('Error adding number:', error);
             return;
         }
-        product.numbers = updatedNumbers;
-        product.last_update = new Date().toISOString();
+        
         input.value = '';
-        renderNumbers();
-        renderProducts();
+        await loadProducts(); // <-- обновляем с сервера
+        renderNumbers(); // перерисовываем номера в модалке
     };
 
     function parseNumbers(input) {
@@ -928,37 +932,43 @@
         return numbers;
     }
 
-    window.removeNumber = async function (numIndex) {
+        window.removeNumber = async function (numIndex) {
         const product = products.find(p => p.id === currentProductId);
         const updatedNumbers = product.numbers.filter((_, i) => i !== numIndex);
+        
         const { error } = await supabase
             .from('products')
-            .update({ numbers: updatedNumbers, last_update: new Date().toISOString() })
+            .update({ 
+                numbers: updatedNumbers, 
+                last_update: new Date().toISOString() 
+            })
             .eq('id', currentProductId);
+
         if (error) {
             console.error('Error removing number:', error);
             return;
         }
-        product.numbers = updatedNumbers;
-        product.last_update = new Date().toISOString();
+        
+        await loadProducts(); // <-- обновляем с сервера
         renderNumbers();
-        renderProducts();
     };
 
-    window.deleteProduct = async function (event, productId) {
+        window.deleteProduct = async function (event, productId) {
         event.stopPropagation();
         if (!confirm('❓ Точно удалить изделие?')) return;
+        
         const { error } = await supabase
             .from('products')
             .delete()
             .eq('id', productId)
             .eq('user_id', currentUser.id);
+            
         if (error) {
             console.error('Error deleting product:', error);
             return;
         }
-        products = products.filter(p => p.id !== productId);
-        renderProducts();
+        
+        await loadProducts(); // <-- обновляем с сервера
     };
 
     function renderNumbers() {
