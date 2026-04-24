@@ -53,6 +53,8 @@
     .btn-secondary:hover { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
     .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
     .btn-danger:hover { background: #fecaca; color: #991b1b; border-color: #fca5a5; }
+    .btn-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .btn-warning:hover { background: #fde68a; color: #78350f; }
     
     #mainScreen { display: flex; flex-direction: column; gap: 20px; height: calc(100vh - 80px); overflow: hidden; }
     #summaryScreen { display: flex; flex-direction: column; height: calc(100vh - 40px); overflow: hidden; }
@@ -74,7 +76,6 @@
     }
     .product-item:hover { border-color: #3b82f6; transform: translateX(4px); }
     
-    /* Стиль для архивной записи */
     .product-item.archived {
         background: #f8fafc;
         opacity: 0.7;
@@ -88,7 +89,6 @@
 
     .product-name { font-size: 16px; font-weight: 600; color: #0f172a; display: flex; align-items: center; gap: 8px; }
     
-    /* Зеленый бейдж для архива */
     .archive-badge {
         font-size: 10px;
         text-transform: uppercase;
@@ -100,10 +100,21 @@
         letter-spacing: 0.05em;
     }
 
+    .pending-badge {
+        font-size: 10px;
+        text-transform: uppercase;
+        background-color: #fef3c7;
+        color: #92400e;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+    }
+
     .product-count { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; margin-right: 12px; border: 1px solid #e2e8f0; }
     
     .delete-product-btn {
-        background: transparent; color: #94a3b8; border: 1px solid #e2e8f0;
+        background: transparent; color: #94a3b8; border: 1px solid #e2e8f9;
         border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center;
         justify-content: center; cursor: pointer;
     }
@@ -125,19 +136,21 @@
     
     .numbers-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px; background: #f8fafc; border-radius: 12px; min-height: 80px; max-height: 35vh; overflow-y: auto; border: 1px solid #e2e8f0; }
     .number-tag { background: #ffffff; color: #1e293b; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0; }
+    .number-tag.pending { background: #fef3c7; border-color: #fde68a; }
     .remove-number { color: #94a3b8; background: transparent; border: none; cursor: pointer; font-size: 16px; padding: 2px; }
     .remove-number:hover { color: #ef4444; }
     
     .empty-state { text-align: center; padding: 48px 24px; color: #94a3b8; font-size: 15px; background: #ffffff; border-radius: 16px; border: 2px dashed #e2e8f0; margin: 20px 0; }
     .error-message { background: #fef2f2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #fee2e2; }
     .success-message { background: #f0fdf4; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #dcfce7; }
+    .info-message { background: #eff6ff; color: #1e40af; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #dbeafe; }
+    .warning-message { background: #fffbeb; color: #92400e; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #fde68a; }
     .auth-toggle { text-align: center; margin-top: 24px; font-size: 14px; color: #64748b; }
-    .auth-toggle a { color: #2563eb; text-decoration: none; font-weight: 600; }
+    .auth-toggle a { color: #2563eb; text-decoration: none; font-weight: 600; cursor: pointer; }
     
     .hidden { display: none !important; }
     #jsonOutput { background: #1e293b; padding: 20px; border-radius: 12px; color: #e2e8f0; white-space: pre-wrap; font-family: monospace; }
 
-    /* Стили для подсказок */
     .input-wrapper { position: relative; width: 100%; }
     .suggestions-box {
         position: absolute; bottom: 100%; left: 0; width: 100%; background: #ffffff;
@@ -148,13 +161,66 @@
     .suggestion-item { padding: 12px 16px; cursor: pointer; font-size: 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
     .suggestion-item:hover { background: #f8fafc; color: #2563eb; }
     .suggestion-meta { font-size: 12px; color: #94a3b8; }
+
+    .offline-banner {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid #fde68a;
+    }
+    .offline-banner.hidden { display: none !important; }
+
+    .sync-status {
+        font-size: 12px;
+        color: #64748b;
+        text-align: center;
+        margin-top: 8px;
+        padding: 4px;
+    }
+    .sync-status.syncing { color: #2563eb; }
+    .sync-status.error { color: #dc2626; }
+    .sync-status.success { color: #16a34a; }
+
+    .loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255,255,255,0.9);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .loading-overlay.hidden { display: none !important; }
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e2e8f0;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header"><h1>Учёт изделий</h1></div>
 
-        <div id="loadingScreen" class="loading"><p>Загрузка...</p></div>
+        <div id="loadingScreen" class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
 
         <div id="authScreen" class="hidden">
             <div class="auth-container">
@@ -172,6 +238,9 @@
         </div>
 
         <div id="mainScreen" class="hidden">
+            <div class="offline-banner hidden" id="offlineBanner">
+                ⚠️ Офлайн-режим. Данные сохранены локально.
+            </div>
             <div class="user-info">
                 <div class="user-email" id="userEmail">user@example.com</div>
                 <button class="logout-btn btn-danger" onclick="handleLogout()">Выйти</button>
@@ -183,6 +252,7 @@
             </div>
 
             <div class="input-section">
+                <div id="syncStatus" class="sync-status"></div>
                 <div class="input-wrapper">
                     <div class="input-group">
                         <input type="text" id="productInput" placeholder="Название (напр. ХТ04)" autocomplete="off">
@@ -190,7 +260,8 @@
                     </div>
                     <div id="suggestionsBox" class="suggestions-box"></div>
                 </div>
-                <button onclick="showSummaryScreen()" class="btn-secondary" style="width: 100%; margin-top: 10px;">📋 Сводный список</button>
+                <button onclick="forceSync()" class="btn-warning" style="width: 100%; margin-top: 8px;" id="syncBtn">🔄 Синхронизировать</button>
+                <button onclick="showSummaryScreen()" class="btn-secondary" style="width: 100%; margin-top: 8px;">📋 Сводный список</button>
             </div>
         </div>
 
@@ -232,35 +303,294 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2R3YnJkeG5leGdqamVrZnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjQ0MDYsImV4cCI6MjA4NDIwMDQwNn0.5ZrQNwFD-m4Rq4lKzfhPEGbw8BXhIoYViC-nJORosyQ';
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // ============ INDEXEDDB ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
+    const DB_NAME = 'ProductsDB';
+    const DB_VERSION = 1;
+    let db = null;
+
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+            request.onupgradeneeded = (event) => {
+                const database = event.target.result;
+                // Хранилище продуктов
+                if (!database.objectStoreNames.contains('products')) {
+                    const store = database.createObjectStore('products', { keyPath: 'localId', autoIncrement: true });
+                    store.createIndex('user_id', 'user_id', { unique: false });
+                    store.createIndex('syncStatus', 'syncStatus', { unique: false });
+                }
+                // Хранилище операций для синхронизации
+                if (!database.objectStoreNames.contains('syncQueue')) {
+                    const queueStore = database.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true });
+                    queueStore.createIndex('user_id', 'user_id', { unique: false });
+                }
+                // Хранилище сессии
+                if (!database.objectStoreNames.contains('session')) {
+                    database.createObjectStore('session', { keyPath: 'key' });
+                }
+            };
+        });
+    }
+
+    async function saveToLocal(storeName, data) {
+        if (!db) db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(storeName, 'readwrite');
+            const store = tx.objectStore(storeName);
+            const request = store.put(data);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function getAllFromLocal(storeName, indexName, value) {
+        if (!db) db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(storeName, 'readonly');
+            const store = tx.objectStore(storeName);
+            let request;
+            if (indexName && value !== undefined) {
+                request = store.index(indexName).getAll(value);
+            } else {
+                request = store.getAll();
+            }
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function deleteFromLocal(storeName, key) {
+        if (!db) db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(storeName, 'readwrite');
+            const store = tx.objectStore(storeName);
+            const request = store.delete(key);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function clearLocalStore(storeName) {
+        if (!db) db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(storeName, 'readwrite');
+            const store = tx.objectStore(storeName);
+            const request = store.clear();
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============ УПРАВЛЕНИЕ СЕССИЕЙ ============
+    async function saveSession(user) {
+        await saveToLocal('session', { key: 'currentUser', data: user });
+    }
+
+    async function getSession() {
+        const sessions = await getAllFromLocal('session');
+        const session = sessions.find(s => s.key === 'currentUser');
+        return session ? session.data : null;
+    }
+
+    async function clearSession() {
+        await deleteFromLocal('session', 'currentUser');
+    }
+
+    // ============ СИНХРОНИЗАЦИЯ ============
+    let isOnline = navigator.onLine;
+    let syncInProgress = false;
+
+    function updateOnlineStatus() {
+        isOnline = navigator.onLine;
+        const banner = document.getElementById('offlineBanner');
+        const syncBtn = document.getElementById('syncBtn');
+        if (!isOnline) {
+            banner.classList.remove('hidden');
+            syncBtn.textContent = '🔄 Нет интернета';
+            syncBtn.disabled = true;
+        } else {
+            banner.classList.add('hidden');
+            syncBtn.textContent = '🔄 Синхронизировать';
+            syncBtn.disabled = false;
+            // Автосинхронизация при появлении сети
+            setTimeout(() => syncToServer(), 1000);
+        }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    async function addToSyncQueue(operation) {
+        await saveToLocal('syncQueue', {
+            user_id: currentUser.id,
+            operation: operation,
+            timestamp: new Date().toISOString(),
+            retries: 0
+        });
+    }
+
+    async function syncToServer() {
+        if (!isOnline || syncInProgress || !currentUser) return;
+        
+        const queue = await getAllFromLocal('syncQueue', 'user_id', currentUser.id);
+        if (queue.length === 0) {
+            updateSyncStatus('Все данные синхронизированы', 'success');
+            return;
+        }
+
+        syncInProgress = true;
+        updateSyncStatus(`Синхронизация ${queue.length} операций...`, 'syncing');
+
+        // Сначала синхронизируем продукты
+        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+        const pendingProducts = localProducts.filter(p => p.syncStatus === 'pending');
+
+        for (const product of pendingProducts) {
+            try {
+                if (product._pendingDelete) {
+                    // Удаление
+                    await supabase.from('products').delete().eq('id', product.serverId).eq('user_id', currentUser.id);
+                } else if (product.serverId) {
+                    // Обновление
+                    await supabase.from('products').update({
+                        numbers: product.numbers,
+                        last_update: new Date().toISOString(),
+                        is_active: product.is_active
+                    }).eq('id', product.serverId);
+                    product.syncStatus = 'synced';
+                    await saveToLocal('products', product);
+                } else {
+                    // Новая запись
+                    const { data, error } = await supabase.from('products').insert({
+                        user_id: currentUser.id,
+                        name: product.name,
+                        numbers: product.numbers,
+                        last_update: new Date().toISOString(),
+                        is_active: product.is_active !== false
+                    }).select();
+                    
+                    if (error) throw error;
+                    
+                    if (data && data[0]) {
+                        product.serverId = data[0].id;
+                        product.syncStatus = 'synced';
+                        await saveToLocal('products', product);
+                    }
+                }
+            } catch (err) {
+                console.error('Sync error for product:', err);
+                product.syncStatus = 'error';
+                await saveToLocal('products', product);
+            }
+        }
+
+        // Обрабатываем очередь операций (для обратной совместимости)
+        for (const item of queue) {
+            try {
+                const op = item.operation;
+                if (op.type === 'archive') {
+                    await supabase.from('products').update({ is_active: false }).eq('id', op.serverId);
+                } else if (op.type === 'delete') {
+                    await supabase.from('products').delete().eq('id', op.serverId).eq('user_id', currentUser.id);
+                }
+                await deleteFromLocal('syncQueue', item.id);
+            } catch (err) {
+                console.error('Queue sync error:', err);
+                item.retries = (item.retries || 0) + 1;
+                if (item.retries > 5) {
+                    await deleteFromLocal('syncQueue', item.id);
+                } else {
+                    await saveToLocal('syncQueue', item);
+                }
+            }
+        }
+
+        // Перезагружаем с сервера для консистентности
+        if (isOnline) {
+            await loadProductsFromServer();
+        }
+
+        syncInProgress = false;
+        const remaining = (await getAllFromLocal('syncQueue', 'user_id', currentUser.id)).length;
+        const pendingCount = (await getAllFromLocal('products', 'user_id', currentUser.id)).filter(p => p.syncStatus === 'pending').length;
+        
+        if (remaining === 0 && pendingCount === 0) {
+            updateSyncStatus('Все данные синхронизированы ✅', 'success');
+        } else {
+            updateSyncStatus(`Осталось синхронизировать: ${pendingCount}`, 'error');
+        }
+    }
+
+    function updateSyncStatus(text, type) {
+        const el = document.getElementById('syncStatus');
+        el.textContent = text;
+        el.className = 'sync-status ' + (type || '');
+    }
+
+    window.forceSync = async function() {
+        if (!isOnline) {
+            alert('Нет подключения к интернету');
+            return;
+        }
+        await syncToServer();
+    };
+
+    // ============ ОСНОВНАЯ ЛОГИКА ============
     let currentUser = null;
-    let products = []; // Теперь храним ВСЕ (и активные, и архив)
+    let products = [];
     let currentProductId = null;
     let isLoginMode = true;
-    let pollInterval = null;
 
     const productInput = document.getElementById('productInput');
     const suggestionsBox = document.getElementById('suggestionsBox');
 
     async function init() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-            currentUser = user;
-            showMainScreen();
-            await loadProducts();
-        } else {
-            showAuthScreen();
+        updateOnlineStatus();
+        
+        // Пробуем загрузить сессию из локального хранилища
+        const localUser = await getSession();
+        
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                currentUser = user;
+                await saveSession(user);
+                showMainScreen();
+                await loadProducts();
+            } else if (localUser && !isOnline) {
+                // Офлайн — используем сохранённую сессию
+                currentUser = localUser;
+                showMainScreen();
+                await loadProductsFromLocal();
+            } else {
+                showAuthScreen();
+            }
+        } catch (err) {
+            // Ошибка сети — пробуем локальную сессию
+            if (localUser) {
+                currentUser = localUser;
+                showMainScreen();
+                await loadProductsFromLocal();
+            } else {
+                showAuthScreen();
+            }
         }
+        
         document.getElementById('loadingScreen').classList.add('hidden');
     }
 
     supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN') {
             currentUser = session.user;
+            saveSession(session.user);
             showMainScreen();
             loadProducts();
         } else if (event === 'SIGNED_OUT') {
             currentUser = null;
             products = [];
+            clearSession();
             showAuthScreen();
         }
     });
@@ -269,6 +599,7 @@
         document.getElementById('authScreen').classList.remove('hidden');
         document.getElementById('mainScreen').classList.add('hidden');
         document.getElementById('summaryScreen').classList.add('hidden');
+        document.getElementById('loadingScreen').classList.add('hidden');
     }
 
     function showMainScreen() {
@@ -276,17 +607,80 @@
         document.getElementById('mainScreen').classList.remove('hidden');
         document.getElementById('summaryScreen').classList.add('hidden');
         document.getElementById('userEmail').textContent = currentUser.email;
-        startPolling();
+        updateOnlineStatus();
     }
 
-    function startPolling() {
-        if (pollInterval) clearInterval(pollInterval);
-        loadProducts();
-        pollInterval = setInterval(() => {
-            if (!document.hidden && currentUser) {
-                loadProducts();
+    async function loadProducts() {
+        if (!isOnline) {
+            await loadProductsFromLocal();
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('is_active', { ascending: false })
+                .order('last_update', { ascending: false });
+
+            if (error) {
+                console.error('Error loading from server:', error);
+                await loadProductsFromLocal();
+                return;
             }
-        }, 10000);
+
+            // Сохраняем в локальную БД
+            await clearLocalStore('products');
+            for (const item of (data || [])) {
+                await saveToLocal('products', {
+                    localId: item.id, // используем serverId как localId для synced
+                    serverId: item.id,
+                    user_id: item.user_id,
+                    name: item.name,
+                    numbers: item.numbers || [],
+                    is_active: item.is_active !== false,
+                    last_update: item.last_update || item.created_at,
+                    created_at: item.created_at,
+                    syncStatus: 'synced'
+                });
+            }
+
+            products = data || [];
+            renderProducts();
+            updateSyncStatus('Все данные синхронизированы ✅', 'success');
+        } catch (err) {
+            console.error('Network error loading products:', err);
+            await loadProductsFromLocal();
+        }
+    }
+
+    async function loadProductsFromLocal() {
+        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+        // Сортируем: активные сверху, потом по дате
+        products = localProducts
+            .sort((a, b) => {
+                if (a.is_active !== b.is_active) return (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0);
+                return new Date(b.last_update || 0) - new Date(a.last_update || 0);
+            })
+            .map(p => ({
+                id: p.serverId || p.localId,
+                name: p.name,
+                numbers: p.numbers || [],
+                is_active: p.is_active !== false,
+                last_update: p.last_update,
+                created_at: p.created_at,
+                _localId: p.localId,
+                _syncStatus: p.syncStatus
+            }));
+        
+        renderProducts();
+        const pendingCount = localProducts.filter(p => p.syncStatus === 'pending').length;
+        if (pendingCount > 0) {
+            updateSyncStatus(`Ожидает синхронизации: ${pendingCount} записей`, 'error');
+        } else {
+            updateSyncStatus('Работа в офлайн-режиме', '');
+        }
     }
 
     window.toggleAuthMode = function () {
@@ -338,73 +732,59 @@
     };
 
     window.handleLogout = async function () {
-        if (pollInterval) clearInterval(pollInterval);
+        await clearSession();
+        await clearLocalStore('products');
+        await clearLocalStore('syncQueue');
         await supabase.auth.signOut();
+        currentUser = null;
+        products = [];
     };
-
-    async function loadProducts() {
-        // Загружаем ВСЕ записи (и активные, и неактивные)
-        // Сортируем: 1. Активные сверху. 2. По дате изменения (новые сверху).
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('is_active', { ascending: false }) // Активные (true) выше архива (false)
-            .order('last_update', { ascending: false }); // ИСПРАВЛЕНО: Сортируем по времени изменения
-        
-        if (error) {
-            console.error('Error loading products:', error);
-            if (error.code === 'PGRST116') {
-                 alert('В базе нет колонки is_active. Выполните SQL запрос из инструкции!');
-            }
-            return;
-        }
-        products = data || [];
-        renderProducts();
-    }
 
     window.addProduct = async function () {
         const input = document.getElementById('productInput');
         const name = input.value.trim().toUpperCase(); 
         if (!name) return;
 
-        // 1. Ищем только АКТИВНЫЙ продукт с таким именем среди всех
+        // Ищем активный продукт с таким именем
         const existingActive = products.find(p => p.is_active && p.name.toLowerCase() === name.toLowerCase());
 
         if (existingActive) {
-            // Если есть активный -> Архивируем его
-            const { error: archiveError } = await supabase
-                .from('products')
-                .update({ is_active: false })
-                .eq('id', existingActive.id);
-            
-            if (archiveError) {
-                console.error('Error archiving product:', archiveError);
-                alert('Ошибка архивации: ' + archiveError.message);
-                return;
+            // Архивируем локально
+            const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+            const localProduct = localProducts.find(p => p.serverId === existingActive.id || p.localId === existingActive._localId);
+            if (localProduct) {
+                localProduct.is_active = false;
+                localProduct.syncStatus = 'pending';
+                localProduct.last_update = new Date().toISOString();
+                await saveToLocal('products', localProduct);
+                
+                if (isOnline) {
+                    await addToSyncQueue({ type: 'archive', serverId: existingActive.id });
+                }
             }
         }
 
-        // 2. Создаем НОВЫЙ активный продукт
-        const { error } = await supabase
-            .from('products')
-            .insert({
-                user_id: currentUser.id,
-                name: name,
-                numbers: [],
-                last_update: new Date().toISOString(),
-                is_active: true 
-            });
-
-        if (error) {
-            console.error('Error adding product:', error);
-            alert('Ошибка добавления: ' + error.message);
-            return;
-        }
+        // Создаём новый продукт локально
+        const newProduct = {
+            user_id: currentUser.id,
+            name: name,
+            numbers: [],
+            last_update: new Date().toISOString(),
+            is_active: true,
+            syncStatus: 'pending',
+            serverId: null
+        };
+        
+        await saveToLocal('products', newProduct);
         
         input.value = '';
         closeSuggestions();
-        await loadProducts(); 
+        await loadProductsFromLocal();
+        
+        // Пытаемся синхронизировать если онлайн
+        if (isOnline) {
+            syncToServer();
+        }
     };
 
     function renderProducts() {
@@ -417,11 +797,10 @@
         }
         
         list.innerHTML = products.map(p => {
-            // Проверяем, архив это или нет
             const isArchived = !p.is_active;
             const archiveClass = isArchived ? 'archived' : '';
-            const archiveBadge = isArchived ? '<span class="archive-badge">АРИВ</span>' : '';
-            // Если архив, не даем открыть по клику
+            const archiveBadge = isArchived ? '<span class="archive-badge">АРХИВ</span>' : '';
+            const pendingBadge = p._syncStatus === 'pending' ? '<span class="pending-badge">⟳</span>' : '';
             const clickAction = isArchived ? '' : `onclick="openModal(${p.id})"`;
             const cursorStyle = isArchived ? 'cursor: default;' : '';
 
@@ -430,10 +809,10 @@
                 <div class="product-name">
                     ${p.name}
                     ${archiveBadge}
+                    ${pendingBadge}
                 </div>
                 <div style="display: flex; align-items: center;">
-                    <div class="product-count">${p.numbers.length} шт</div>
-                    <!-- Удаление работает и для активных, и для архивных -->
+                    <div class="product-count">${(p.numbers || []).length} шт</div>
                     <button class="delete-product-btn" onclick="deleteProduct(event, ${p.id})">🗑️</button>
                 </div>
             </div>
@@ -443,7 +822,6 @@
         empty.classList.add('hidden');
     }
 
-    // ЛОГИКА ПОИСКА: Показываем подсказки ТОЛЬКО для АКТИВНЫХ
     productInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
         if (query.length === 0) {
@@ -451,7 +829,6 @@
             return;
         }
         
-        // Фильтр: p.is_active === true
         const filtered = products.filter(p => p.is_active && p.name.toLowerCase().includes(query));
         renderSuggestions(filtered);
     });
@@ -474,7 +851,7 @@
             div.className = 'suggestion-item';
             div.innerHTML = `
                 <span style="font-weight:600; color:#1e293b;">${p.name}</span>
-                <span class="suggestion-meta">${p.numbers.length} шт (Сейчас)</span>
+                <span class="suggestion-meta">${(p.numbers || []).length} шт (Сейчас)</span>
             `;
             div.onclick = (e) => {
                 e.stopPropagation();
@@ -493,7 +870,6 @@
     }
 
     window.openModal = function (productId) {
-        // Защита от открытия архивного товара
         const product = products.find(p => p.id === productId);
         if (!product || !product.is_active) return;
 
@@ -516,25 +892,26 @@
         
         const product = products.find(p => p.id === currentProductId);
         const newNumbers = parseNumbers(value);
-        const updatedNumbers = [...product.numbers, ...newNumbers];
+        const updatedNumbers = [...(product.numbers || []), ...newNumbers];
         
-        const { error } = await supabase
-            .from('products')
-            .update({ 
-                numbers: updatedNumbers, 
-                last_update: new Date().toISOString() 
-            })
-            .eq('id', currentProductId);
-
-        if (error) {
-            console.error('Error adding number:', error);
-            alert('Ошибка добавления номера: ' + error.message);
-            return;
+        // Обновляем локально
+        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+        const localProduct = localProducts.find(p => p.serverId === product.id || p.localId === product._localId);
+        
+        if (localProduct) {
+            localProduct.numbers = updatedNumbers;
+            localProduct.last_update = new Date().toISOString();
+            localProduct.syncStatus = 'pending';
+            await saveToLocal('products', localProduct);
         }
-        
+
         input.value = '';
-        await loadProducts();
+        await loadProductsFromLocal();
         renderNumbers();
+        
+        if (isOnline) {
+            syncToServer();
+        }
     };
 
     function parseNumbers(input) {
@@ -555,48 +932,59 @@
 
     window.removeNumber = async function (numIndex) {
         const product = products.find(p => p.id === currentProductId);
-        const updatedNumbers = product.numbers.filter((_, i) => i !== numIndex);
+        const updatedNumbers = (product.numbers || []).filter((_, i) => i !== numIndex);
         
-        const { error } = await supabase
-            .from('products')
-            .update({ 
-                numbers: updatedNumbers, 
-                last_update: new Date().toISOString() 
-            })
-            .eq('id', currentProductId);
-
-        if (error) {
-            console.error('Error removing number:', error);
-            return;
+        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+        const localProduct = localProducts.find(p => p.serverId === product.id || p.localId === product._localId);
+        
+        if (localProduct) {
+            localProduct.numbers = updatedNumbers;
+            localProduct.last_update = new Date().toISOString();
+            localProduct.syncStatus = 'pending';
+            await saveToLocal('products', localProduct);
         }
         
-        await loadProducts();
+        await loadProductsFromLocal();
         renderNumbers();
+        
+        if (isOnline) {
+            syncToServer();
+        }
     };
 
     window.deleteProduct = async function (event, productId) {
         event.stopPropagation();
         if (!confirm('❓ Точно удалить изделие?')) return;
         
-        // Удаляет запись по ID, вне зависимости от статуса is_active
-        const { error } = await supabase
-            .from('products')
-            .delete()
-            .eq('id', productId)
-            .eq('user_id', currentUser.id);
-            
-        if (error) {
-            console.error('Error deleting product:', error);
-            return;
+        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+        const localProduct = localProducts.find(p => p.serverId === productId || p.localId === productId);
+        
+        if (localProduct) {
+            if (localProduct.serverId) {
+                // Помечаем для удаления на сервере
+                localProduct._pendingDelete = true;
+                localProduct.syncStatus = 'pending';
+                await saveToLocal('products', localProduct);
+                if (isOnline) {
+                    await addToSyncQueue({ type: 'delete', serverId: localProduct.serverId });
+                }
+            } else {
+                // Локальная запись без serverId — удаляем сразу
+                await deleteFromLocal('products', localProduct.localId);
+            }
         }
         
-        await loadProducts();
+        await loadProductsFromLocal();
+        
+        if (isOnline) {
+            syncToServer();
+        }
     };
 
     function renderNumbers() {
         const list = document.getElementById('numbersList');
         const product = products.find(p => p.id === currentProductId);
-        if (!product || product.numbers.length === 0) {
+        if (!product || !(product.numbers || []).length) {
             list.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">Номера не добавлены</p>';
             return;
         }
@@ -609,19 +997,18 @@
     }
 
     window.showSummaryScreen = async function () {
-        // Для JSON берем всё, что есть на экране
         const summary = {};
         products.forEach(p => {
-            // Добавляем индикатор статуса в JSON
             const status = p.is_active ? 'Активный' : 'Архив';
+            const syncStatus = p._syncStatus === 'pending' ? ' (не синхронизирован)' : '';
             
             if (!summary[p.name]) summary[p.name] = [];
             
             summary[p.name].push({
-                status: status,
-                created: new Date(p.created_at).toLocaleString('ru-RU'),
-                count: p.numbers.length,
-                numbers: p.numbers
+                status: status + syncStatus,
+                created: new Date(p.created_at || Date.now()).toLocaleString('ru-RU'),
+                count: (p.numbers || []).length,
+                numbers: p.numbers || []
             });
         });
 
@@ -636,16 +1023,15 @@
     };
 
     window.downloadJSON = function () {
-        // Логика аналогична showSummaryScreen
         const summary = {};
         products.forEach(p => {
             const status = p.is_active ? 'Активный' : 'Архив';
             if (!summary[p.name]) summary[p.name] = [];
             summary[p.name].push({
                 status: status,
-                created: new Date(p.created_at).toLocaleString('ru-RU'),
-                count: p.numbers.length,
-                numbers: p.numbers
+                created: new Date(p.created_at || Date.now()).toLocaleString('ru-RU'),
+                count: (p.numbers || []).length,
+                numbers: p.numbers || []
             });
         });
 
