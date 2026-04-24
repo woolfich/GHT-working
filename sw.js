@@ -1,18 +1,41 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
 
-// Кэшируем страницы: сначала сеть, если нет — кэш
+// Предварительное кэширование основных ресурсов
+workbox.precaching.precacheAndRoute([
+  { url: './index.html', revision: '2' },
+  { url: './manifest.json', revision: '1' }
+]);
+
+// Стратегия для страниц: сначала кэш, потом сеть (для офлайн-работы)
 workbox.routing.registerRoute(
   ({request}) => request.mode === 'navigate',
-  new workbox.strategies.NetworkFirst({ 
+  new workbox.strategies.CacheFirst({ 
     cacheName: 'pages',
-    networkTimeoutSeconds: 3
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 30 * 24 * 60 * 60 // 30 дней
+      })
+    ]
   })
 );
 
-// Кэшируем статику (CSS, JS, иконки): кэш + фоновое обновление
+// Статика: кэш + фоновое обновление
 workbox.routing.registerRoute(
-  ({request}) => ['image', 'style', 'script'].includes(request.destination),
+  ({request}) => ['image', 'style', 'script', 'font'].includes(request.destination),
   new workbox.strategies.StaleWhileRevalidate({ 
-    cacheName: 'assets'
+    cacheName: 'assets',
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 60,
+        maxAgeSeconds: 60 * 24 * 60 * 60 // 60 дней
+      })
+    ]
   })
+);
+
+// API запросы к Supabase: не кэшируем, пропускаем
+workbox.routing.registerRoute(
+  ({url}) => url.hostname.includes('supabase.co'),
+  new workbox.strategies.NetworkOnly()
 );
