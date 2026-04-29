@@ -1,746 +1,927 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1e293b">
+<title>Учёт изделий</title>
+<link rel="manifest" href="./manifest.json">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background-color: #f8fafc;
+background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
+background-size: 20px 20px;
+min-height: 100vh;
+padding: 20px;
+color: #1e293b;
+font-size: 16px;
+line-height: 1.6;
+}
+.container { max-width: 640px; margin: 0 auto; height: 100%; }
+.header { text-align: center; margin-bottom: 24px; padding: 10px; }
+.header h1 { font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.025em; }
+.auth-container, .input-section, .user-info, .summary-container {
+background: #ffffff; border-radius: 16px; padding: 28px;
+box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+border: 1px solid #e2e8f0;
+}
+.auth-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; text-align: center; color: #0f172a; }
+.input-group { display: flex; gap: 12px; align-items: center; }
+input {
+flex: 1; padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 10px;
+font-size: 16px; outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+background: #ffffff; color: #1e293b;
+}
+input:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+input::placeholder { color: #94a3b8; }
+button {
+padding: 14px 24px; background: #2563eb; color: white; border: none;
+border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
+white-space: nowrap; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+button:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+button:disabled { background: #94a3b8; opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.btn-secondary:hover { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
+.btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.btn-danger:hover { background: #fecaca; color: #991b1b; border-color: #fca5a5; }
+.btn-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.btn-warning:hover { background: #fde68a; color: #78350f; }
+#mainScreen { display: flex; flex-direction: column; gap: 20px; height: calc(100vh - 80px); overflow: hidden; }
+#summaryScreen { display: flex; flex-direction: column; height: calc(100vh - 40px); overflow: hidden; }
+.summary-top-panel { flex-shrink: 0; padding-bottom: 20px; }
+.summary-actions { display: flex; gap: 12px; }
+.summary-actions button { flex: 1; }
+.summary-scroll-wrapper { flex: 1; overflow-y: auto; padding-bottom: 24px; }
+.user-info { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; flex-shrink: 0; background: #ffffff; border-bottom: 1px solid #f1f5f9; }
+.user-email { color: #64748b; font-size: 14px; font-weight: 500; }
+.products-wrapper { flex: 1; overflow-y: auto; padding: 4px; }
+.products-list { display: flex; flex-direction: column; gap: 12px; }
+.product-item {
+background: #ffffff; border-radius: 12px; padding: 16px 20px;
+display: flex; justify-content: space-between; align-items: center;
+cursor: pointer; border: 1px solid #e2e8f0; transition: all 0.2s ease;
+}
+.product-item:hover { border-color: #3b82f6; transform: translateX(4px); }
+.product-item.archived {
+background: #f8fafc;
+opacity: 0.7;
+border-color: #e2e8f0;
+cursor: default;
+}
+.product-item.archived:hover {
+transform: none;
+border-color: #e2e8f0;
+}
+.product-name { font-size: 16px; font-weight: 600; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+.archive-badge {
+font-size: 10px;
+text-transform: uppercase;
+background-color: #dcfce7;
+color: #166534;
+padding: 2px 6px;
+border-radius: 4px;
+font-weight: 800;
+letter-spacing: 0.05em;
+}
+.pending-badge {
+font-size: 10px;
+text-transform: uppercase;
+background-color: #fef3c7;
+color: #92400e;
+padding: 2px 6px;
+border-radius: 4px;
+font-weight: 800;
+letter-spacing: 0.05em;
+}
+.product-count { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; margin-right: 12px; border: 1px solid #e2e8f0; }
+.delete-product-btn {
+background: transparent; color: #94a3b8; border: 1px solid #e2e8f0;
+border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center;
+justify-content: center; cursor: pointer;
+}
+.delete-product-btn:hover { background: #fee2e2; color: #ef4444; border-color: #fecaca; }
+.input-section { margin-top: auto; padding: 24px; border-radius: 16px 16px 0 0; border-bottom: none; box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03); position: relative; z-index: 10; }
+.modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 1000; backdrop-filter: blur(4px); }
+.modal-content {
+position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+background: #ffffff; border-radius: 20px; padding: 32px; width: 90%;
+max-width: 480px; max-height: 80vh; display: flex; flex-direction: column;
+border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.modal-title { font-size: 20px; font-weight: 700; color: #0f172a; }
+.close-btn { background: #f8fafc; color: #64748b; padding: 8px 16px; font-size: 13px; border: 1px solid #e2e8f0; }
+.hint { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+.numbers-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px; background: #f8fafc; border-radius: 12px; min-height: 80px; max-height: 35vh; overflow-y: auto; border: 1px solid #e2e8f0; }
+.number-tag { background: #ffffff; color: #1e293b; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0; }
+.remove-number { color: #94a3b8; background: transparent; border: none; cursor: pointer; font-size: 16px; padding: 2px; }
+.remove-number:hover { color: #ef4444; }
+.empty-state { text-align: center; padding: 48px 24px; color: #94a3b8; font-size: 15px; background: #ffffff; border-radius: 16px; border: 2px dashed #e2e8f0; margin: 20px 0; }
+.error-message { background: #fef2f2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #fee2e2; }
+.success-message { background: #f0fdf4; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #dcfce7; }
+.auth-toggle { text-align: center; margin-top: 24px; font-size: 14px; color: #64748b; }
+.auth-toggle a { color: #2563eb; text-decoration: none; font-weight: 600; cursor: pointer; }
+.hidden { display: none !important; }
+#jsonOutput { background: #1e293b; padding: 20px; border-radius: 12px; color: #e2e8f0; white-space: pre-wrap; font-family: monospace; }
+.input-wrapper { position: relative; width: 100%; }
+.suggestions-box {
+position: absolute; bottom: 100%; left: 0; width: 100%; background: #ffffff;
+border: 1px solid #e2e8f0; border-radius: 10px;
+box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 500;
+max-height: 250px; overflow-y: auto; display: none; margin-bottom: 4px;
+}
+.suggestion-item { padding: 12px 16px; cursor: pointer; font-size: 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+.suggestion-item:hover { background: #f8fafc; color: #2563eb; }
+.suggestion-meta { font-size: 12px; color: #94a3b8; }
+.offline-banner {
+background: #fef3c7;
+color: #92400e;
+padding: 8px 16px;
+border-radius: 8px;
+font-size: 13px;
+font-weight: 600;
+text-align: center;
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+border: 1px solid #fde68a;
+}
+.offline-banner.hidden { display: none !important; }
+.sync-status {
+font-size: 12px;
+color: #64748b;
+text-align: center;
+margin-top: 8px;
+padding: 4px;
+}
+.sync-status.syncing { color: #2563eb; }
+.sync-status.error { color: #dc2626; }
+.sync-status.success { color: #16a34a; }
+.loading-overlay {
+position: fixed;
+inset: 0;
+background: rgba(255,255,255,0.9);
+z-index: 2000;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+gap: 16px;
+}
+.loading-overlay.hidden { display: none !important; }
+.spinner {
+width: 40px;
+height: 40px;
+border: 3px solid #e2e8f0;
+border-top-color: #2563eb;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+/* 🆕 Стили для дат в номерах */
+.number-tag { flex-direction: column !important; align-items: flex-start !important; padding: 8px 12px !important; position: relative !important; }
+.number-date { font-size: 11px; color: #94a3b8; margin-top: 2px; line-height: 1; }
+.number-tag .remove-number { position: absolute !important; top: 6px !important; right: 8px !important; font-size: 18px !important; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header"><h1>Учёт изделий</h1></div>
+<div id="loadingScreen" class="loading-overlay">
+<div class="spinner"></div>
+<p>Загрузка...</p>
+</div>
+<div id="authScreen" class="hidden">
+<div class="auth-container">
+<div class="auth-title" id="authTitle">Вход</div>
+<div id="authError"></div>
+<div id="authSuccess"></div>
+<input type="email" id="authEmail" placeholder="Email" style="width:100%">
+<input type="password" id="authPassword" placeholder="Пароль" style="width:100%; margin-top: 10px;">
+<button id="authSubmitBtn" onclick="handleAuth()" style="width: 100%; margin-top: 12px;">Войти</button>
+<div class="auth-toggle">
+<span id="authToggleText">Нет аккаунта?</span>
+<a onclick="toggleAuthMode()">Зарегистрироваться</a>
+</div>
+</div>
+</div>
+<div id="mainScreen" class="hidden">
+<div class="offline-banner hidden" id="offlineBanner">
+⚠️ Офлайн-режим. Данные сохранены локально.
+</div>
+<div class="user-info">
+<div class="user-email" id="userEmail">user@example.com</div>
+<button class="logout-btn btn-danger" onclick="handleLogout()">Выйти</button>
+</div>
+<div class="products-wrapper">
+<div class="products-list" id="productsList"></div>
+<div class="empty-state hidden" id="emptyState"><p>Добавьте первое изделие</p></div>
+</div>
+<div class="input-section">
+<div id="syncStatus" class="sync-status"></div>
+<div class="input-wrapper">
+<div class="input-group">
+<input type="text" id="productInput" placeholder="Название (напр. ХТ04)" autocomplete="off">
+<button onclick="addProduct()">Добавить</button>
+</div>
+<div id="suggestionsBox" class="suggestions-box"></div>
+</div>
+<button onclick="forceSync()" class="btn-warning" style="width: 100%; margin-top: 8px;" id="syncBtn">🔄 Синхронизировать</button>
+<button onclick="showSummaryScreen()" class="btn-secondary" style="width: 100%; margin-top: 8px;">📋 Сводный список</button>
+</div>
+</div>
+<div id="summaryScreen" class="hidden">
+<div class="summary-top-panel">
+<div class="header"><h1>📋 Сводный список</h1></div>
+<div class="summary-actions">
+<button onclick="downloadJSON()">💾 Скачать JSON</button>
+<button onclick="backToMain()" class="btn-secondary">⬅ Назад</button>
+</div>
+</div>
+<div class="summary-scroll-wrapper">
+<div class="summary-container">
+<pre id="jsonOutput"></pre>
+</div>
+</div>
+</div>
+<div class="modal" id="modal">
+<div class="modal-content">
+<div class="modal-header">
+<div class="modal-title" id="modalTitle"></div>
+<button class="close-btn" onclick="closeModal()">Назад</button>
+</div>
+<div class="input-group">
+<input type="text" id="numberInput" placeholder="Номер изделия">
+<button onclick="addNumber()">Добавить</button>
+</div>
+<p class="hint">Для добавления нескольких: 55, 56, 57 или 55-60</p>
+<div class="numbers-list" id="numbersList"></div>
+</div>
+</div>
+</div>
 <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    
-    const SUPABASE_URL = 'https://ntsdwbrdxnexgjjekfqk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2R3YnJkeG5leGdqamVrZnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjQ0MDYsImV4cCI6MjA4NDIwMDQwNn0.5ZrQNwFD-m4Rq4lKzfhPEGbw8BXhIoYViC-nJORosyQ';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // ============ УТИЛИТЫ ============
-    function generateId() {
-        if (crypto.randomUUID) return crypto.randomUUID();
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-
-    // Новая функция форматирования номера с датой для отображения в JSON
-    function formatNumbersWithDate(numbers) {
-        if (!numbers || !numbers.length) return [];
-        return numbers.map(n => `${n.value}, ${n.added}`);
-    }
-
-    // ============ INDEXEDDB ============
-    const DB_NAME = 'ProductsDB_v2';
-    const DB_VERSION = 1;
-    let db = null;
-
-    function openDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => resolve(request.result);
-            request.onupgradeneeded = (event) => {
-                const database = event.target.result;
-                if (!database.objectStoreNames.contains('products')) {
-                    const store = database.createObjectStore('products', { keyPath: 'localId' });
-                    store.createIndex('user_id', 'user_id', { unique: false });
-                    store.createIndex('syncStatus', 'syncStatus', { unique: false });
-                    store.createIndex('serverId', 'serverId', { unique: false });
-                }
-                if (!database.objectStoreNames.contains('session')) {
-                    database.createObjectStore('session', { keyPath: 'key' });
-                }
-            };
-        });
-    }
-
-    async function saveToLocal(storeName, data) {
-        if (!db) db = await openDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readwrite');
-            const store = tx.objectStore(storeName);
-            const request = store.put(data);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    async function getAllFromLocal(storeName, indexName, value) {
-        if (!db) db = await openDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readonly');
-            const store = tx.objectStore(storeName);
-            let request;
-            if (indexName && value !== undefined) {
-                request = store.index(indexName).getAll(value);
-            } else {
-                request = store.getAll();
-            }
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    async function deleteFromLocal(storeName, key) {
-        if (!db) db = await openDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readwrite');
-            const store = tx.objectStore(storeName);
-            const request = store.delete(key);
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    async function clearLocalStore(storeName) {
-        if (!db) db = await openDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readwrite');
-            const store = tx.objectStore(storeName);
-            const request = store.clear();
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    // ============ СЕССИЯ ============
-    async function saveSession(user) {
-        await saveToLocal('session', { key: 'currentUser', data: user });
-    }
-
-    async function getSession() {
-        const sessions = await getAllFromLocal('session');
-        const session = sessions.find(s => s.key === 'currentUser');
-        return session ? session.data : null;
-    }
-
-    async function clearSession() {
-        await deleteFromLocal('session', 'currentUser');
-    }
-
-    // ============ СЕТЬ ============
-    let isOnline = navigator.onLine;
-    let syncInProgress = false;
-
-    function updateOnlineStatus() {
-        isOnline = navigator.onLine;
-        const banner = document.getElementById('offlineBanner');
-        const syncBtn = document.getElementById('syncBtn');
-        if (!isOnline) {
-            banner.classList.remove('hidden');
-            syncBtn.textContent = '🔄 Нет интернета';
-            syncBtn.disabled = true;
-        } else {
-            banner.classList.add('hidden');
-            syncBtn.textContent = '🔄 Синхронизировать';
-            syncBtn.disabled = false;
-        }
-    }
-
-    window.addEventListener('online', () => {
-        updateOnlineStatus();
-        if (currentUser) {
-            loadProducts();
-        }
-    });
-    window.addEventListener('offline', updateOnlineStatus);
-
-    function updateSyncStatus(text, type) {
-        const el = document.getElementById('syncStatus');
-        el.textContent = text;
-        el.className = 'sync-status ' + (type || '');
-    }
-
-    // ============ СИНХРОНИЗАЦИЯ ============
-    async function syncToServer() {
-        if (!isOnline || syncInProgress || !currentUser) return;
-        
-        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
-        const pendingProducts = localProducts.filter(p => p.syncStatus === 'pending');
-
-        if (pendingProducts.length === 0) {
-            updateSyncStatus('Все данные синхронизированы ✅', 'success');
-            return;
-        }
-
-        syncInProgress = true;
-        updateSyncStatus(`Синхронизация ${pendingProducts.length} записей...`, 'syncing');
-
-        for (const product of pendingProducts) {
-            try {
-                if (product._pendingDelete) {
-                    if (product.serverId) {
-                        await supabase.from('products').delete().eq('id', product.serverId).eq('user_id', currentUser.id);
-                    }
-                    await deleteFromLocal('products', product.localId);
-                    continue;
-                }
-
-                if (product.serverId) {
-                    const { error } = await supabase.from('products').update({
-                        numbers: product.numbers,
-                        last_update: new Date().toISOString(),
-                        is_active: product.is_active
-                    }).eq('id', product.serverId);
-                    if (error) throw error;
-                    product.syncStatus = 'synced';
-                    await saveToLocal('products', product);
-                } else {
-                    const { data, error } = await supabase.from('products').insert({
-                        user_id: currentUser.id,
-                        name: product.name,
-                        numbers: product.numbers,
-                        last_update: new Date().toISOString(),
-                        is_active: product.is_active !== false
-                    }).select();
-                    if (error) throw error;
-                    if (data && data[0]) {
-                        product.serverId = data[0].id;
-                        product.syncStatus = 'synced';
-                        await saveToLocal('products', product);
-                    }
-                }
-            } catch (err) {
-                console.error('Sync error:', err);
-                product.syncStatus = 'error';
-                await saveToLocal('products', product);
-            }
-        }
-
-        syncInProgress = false;
-        const remaining = (await getAllFromLocal('products', 'user_id', currentUser.id)).filter(p => p.syncStatus === 'pending').length;
-        
-        if (remaining === 0) {
-            updateSyncStatus('Все данные синхронизированы ✅', 'success');
-        } else {
-            updateSyncStatus(`Ошибка синхронизации: ${remaining} записей`, 'error');
-        }
-
-        await loadProductsFromLocal();
-    }
-
-    window.forceSync = async function() {
-        if (!isOnline) {
-            alert('Нет подключения к интернету');
-            return;
-        }
-        await syncToServer();
-    };
-
-    // ============ ОСНОВНАЯ ЛОГИКА ============
-    let currentUser = null;
-    let products = [];
-    let currentProductId = null;
-    let isLoginMode = true;
-
-    const productInput = document.getElementById('productInput');
-    const suggestionsBox = document.getElementById('suggestionsBox');
-
-    async function init() {
-        updateOnlineStatus();
-        const localUser = await getSession();
-        
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                currentUser = user;
-                await saveSession(user);
-                showMainScreen();
-                await loadProducts();
-            } else if (localUser && !isOnline) {
-                currentUser = localUser;
-                showMainScreen();
-                await loadProductsFromLocal();
-            } else {
-                showAuthScreen();
-            }
-        } catch (err) {
-            if (localUser) {
-                currentUser = localUser;
-                showMainScreen();
-                await loadProductsFromLocal();
-            } else {
-                showAuthScreen();
-            }
-        }
-        document.getElementById('loadingScreen').classList.add('hidden');
-    }
-
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') {
-            currentUser = session.user;
-            saveSession(session.user);
-            showMainScreen();
-            loadProducts();
-        } else if (event === 'SIGNED_OUT') {
-            currentUser = null;
-            products = [];
-            showAuthScreen();
-        }
-    });
-
-    function showAuthScreen() {
-        document.getElementById('authScreen').classList.remove('hidden');
-        document.getElementById('mainScreen').classList.add('hidden');
-        document.getElementById('summaryScreen').classList.add('hidden');
-        document.getElementById('loadingScreen').classList.add('hidden');
-    }
-
-    function showMainScreen() {
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('mainScreen').classList.remove('hidden');
-        document.getElementById('summaryScreen').classList.add('hidden');
-        document.getElementById('userEmail').textContent = currentUser.email;
-        updateOnlineStatus();
-    }
-
-    async function loadProducts() {
-        if (isOnline) {
-            try {
-                await loadProductsFromServer();
-            } catch (err) {
-                console.error('Server load failed:', err);
-                await loadProductsFromLocal();
-            }
-        } else {
-            await loadProductsFromLocal();
-        }
-    }
-
-    async function loadProductsFromServer() {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('is_active', { ascending: false })
-            .order('last_update', { ascending: false });
-
-        if (error) throw error;
-
-        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
-
-        for (const item of (data || [])) {
-            // Убедимся, что numbers – массив объектов {value, added} (может прийти как массив строк при первой миграции)
-            let numbers = item.numbers || [];
-            // Преобразуем старые строки в объекты без даты (добавим текущую дату как заглушку)
-            numbers = numbers.map(n => {
-                if (typeof n === 'string') return { value: n, added: new Date().toLocaleDateString('ru-RU') };
-                return n;
-            });
-
-            const local = localProducts.find(p => p.serverId === item.id);
-            if (local) {
-                if (local.syncStatus === 'synced' && !local._pendingDelete) {
-                    local.name = item.name;
-                    local.numbers = numbers;
-                    local.is_active = item.is_active !== false;
-                    local.last_update = item.last_update || item.created_at;
-                    local.created_at = item.created_at;
-                    await saveToLocal('products', local);
-                }
-            } else {
-                await saveToLocal('products', {
-                    localId: generateId(),
-                    serverId: item.id,
-                    user_id: item.user_id,
-                    name: item.name,
-                    numbers: numbers,
-                    is_active: item.is_active !== false,
-                    last_update: item.last_update || item.created_at,
-                    created_at: item.created_at,
-                    syncStatus: 'synced'
-                });
-            }
-        }
-
-        const serverIds = new Set((data || []).map(d => d.id));
-        for (const local of localProducts) {
-            if (local.serverId && local.syncStatus === 'synced' && !serverIds.has(local.serverId)) {
-                await deleteFromLocal('products', local.localId);
-            }
-        }
-
-        await loadProductsFromLocal();
-    }
-
-    async function loadProductsFromLocal() {
-        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
-        products = localProducts
-            .sort((a, b) => {
-                if (a.is_active !== b.is_active) return (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0);
-                return new Date(b.last_update || 0) - new Date(a.last_update || 0);
-            })
-            .map(p => ({
-                id: p.localId,
-                serverId: p.serverId,
-                name: p.name,
-                numbers: p.numbers || [],
-                is_active: p.is_active !== false,
-                last_update: p.last_update,
-                created_at: p.created_at,
-                syncStatus: p.syncStatus
-            }));
-        
-        renderProducts();
-        const pendingCount = localProducts.filter(p => p.syncStatus === 'pending').length;
-        if (pendingCount > 0) {
-            updateSyncStatus(`Ожидает синхронизации: ${pendingCount} записей`, 'error');
-        } else {
-            updateSyncStatus(isOnline ? 'Все данные синхронизированы ✅' : 'Работа в офлайн-режиме', isOnline ? 'success' : '');
-        }
-    }
-
-    window.toggleAuthMode = function () {
-        isLoginMode = !isLoginMode;
-        const title = document.getElementById('authTitle');
-        const btn = document.getElementById('authSubmitBtn');
-        const toggleText = document.getElementById('authToggleText');
-        if (isLoginMode) {
-            title.textContent = 'Вход';
-            btn.textContent = 'Войти';
-            toggleText.textContent = 'Нет аккаунта?';
-        } else {
-            title.textContent = 'Регистрация';
-            btn.textContent = 'Зарегистрироваться';
-            toggleText.textContent = 'Уже есть аккаунт?';
-        }
-        document.getElementById('authError').innerHTML = '';
-        document.getElementById('authSuccess').innerHTML = '';
-    };
-
-    window.handleAuth = async function () {
-        const email = document.getElementById('authEmail').value.trim();
-        const password = document.getElementById('authPassword').value;
-        const errorDiv = document.getElementById('authError');
-        const successDiv = document.getElementById('authSuccess');
-        errorDiv.innerHTML = '';
-        successDiv.innerHTML = '';
-        if (!email || !password) {
-            errorDiv.innerHTML = '<div class="error-message">Заполните все поля</div>';
-            return;
-        }
-        const btn = document.getElementById('authSubmitBtn');
-        btn.disabled = true;
-        btn.textContent = 'Загрузка...';
-        try {
-            if (isLoginMode) {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-            } else {
-                const { error } = await supabase.auth.signUp({ email, password });
-                if (error) throw error;
-                successDiv.innerHTML = '<div class="success-message">Регистрация успешна! Проверьте email для подтверждения.</div>';
-            }
-        } catch (error) {
-            errorDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
-            btn.disabled = false;
-            btn.textContent = isLoginMode ? 'Войти' : 'Зарегистрироваться';
-        }
-    };
-
-    window.handleLogout = async function () {
-        await clearSession();
-        await clearLocalStore('products');
-        await supabase.auth.signOut();
-        currentUser = null;
-        products = [];
-    };
-
-    window.addProduct = async function () {
-        const input = document.getElementById('productInput');
-        const name = input.value.trim().toUpperCase(); 
-        if (!name) return;
-
-        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
-        const existingActive = localProducts.find(p => p.is_active && p.name.toLowerCase() === name.toLowerCase());
-
-        if (existingActive) {
-            existingActive.is_active = false;
-            existingActive.last_update = new Date().toISOString();
-            existingActive.syncStatus = 'pending';
-            await saveToLocal('products', existingActive);
-        }
-
-        const newProduct = {
-            localId: generateId(),
-            user_id: currentUser.id,
-            name: name,
-            numbers: [], // теперь массив объектов
-            last_update: new Date().toISOString(),
-            is_active: true,
-            syncStatus: 'pending',
-            serverId: null,
-            created_at: new Date().toISOString()
-        };
-        
-        await saveToLocal('products', newProduct);
-        
-        input.value = '';
-        closeSuggestions();
-        await loadProductsFromLocal();
-        
-        if (isOnline) {
-            syncToServer();
-        }
-    };
-
-    function renderProducts() {
-        const list = document.getElementById('productsList');
-        const empty = document.getElementById('emptyState');
-        if (products.length === 0) {
-            list.innerHTML = '';
-            empty.classList.remove('hidden');
-            return;
-        }
-        
-        list.innerHTML = products.map(p => {
-            const isArchived = !p.is_active;
-            const archiveClass = isArchived ? 'archived' : '';
-            const archiveBadge = isArchived ? '<span class="archive-badge">АРХИВ</span>' : '';
-            const pendingBadge = p.syncStatus === 'pending' ? '<span class="pending-badge">⟳</span>' : '';
-            const clickAction = isArchived ? '' : `onclick="openModal('${p.id}')"`;
-            const cursorStyle = isArchived ? 'cursor: default;' : '';
-
-            return `
-            <div class="product-item ${archiveClass}" ${clickAction} style="${cursorStyle}">
-                <div class="product-name">
-                    ${p.name}
-                    ${archiveBadge}
-                    ${pendingBadge}
-                </div>
-                <div style="display: flex; align-items: center;">
-                    <div class="product-count">${(p.numbers || []).length} шт</div>
-                    <button class="delete-product-btn" onclick="deleteProduct(event, '${p.id}')">🗑️</button>
-                </div>
-            </div>
-            `;
-        }).join('');
-
-        empty.classList.add('hidden');
-    }
-
-    productInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        if (query.length === 0) {
-            closeSuggestions();
-            return;
-        }
-        const filtered = products.filter(p => p.is_active && p.name.toLowerCase().includes(query));
-        renderSuggestions(filtered);
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!productInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-            closeSuggestions();
-        }
-    });
-
-    function renderSuggestions(items) {
-        suggestionsBox.innerHTML = '';
-        if (items.length === 0) {
-            suggestionsBox.style.display = 'none';
-            return;
-        }
-
-        items.forEach(p => {
-            const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.innerHTML = `
-                <span style="font-weight:600; color:#1e293b;">${p.name}</span>
-                <span class="suggestion-meta">${(p.numbers || []).length} шт (Сейчас)</span>
-            `;
-            div.onclick = (e) => {
-                e.stopPropagation();
-                openModal(p.id);
-                productInput.value = '';
-                closeSuggestions();
-            };
-            suggestionsBox.appendChild(div);
-        });
-
-        suggestionsBox.style.display = 'block';
-    }
-
-    function closeSuggestions() {
-        suggestionsBox.style.display = 'none';
-    }
-
-    window.openModal = function (productId) {
-        const product = products.find(p => p.id === productId);
-        if (!product || !product.is_active) return;
-
-        currentProductId = productId;
-        document.getElementById('modalTitle').textContent = product.name;
-        document.getElementById('modal').style.display = 'block';
-        renderNumbers();
-    };
-
-    window.closeModal = function () {
-        document.getElementById('modal').style.display = 'none';
-        document.getElementById('numberInput').value = '';
-        currentProductId = null;
-    };
-
-    window.addNumber = async function () {
-        const input = document.getElementById('numberInput');
-        const value = input.value.trim();
-        if (!value || !currentProductId) return;
-        
-        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
-        const localProduct = localProducts.find(p => p.localId === currentProductId);
-        if (!localProduct) return;
-        
-        const newNumbers = parseNumbers(value);
-        const now = new Date().toLocaleDateString('ru-RU'); // ДД.ММ.ГГ
-        const newNumbersWithDate = newNumbers.map(num => ({ value: num, added: now }));
-        
-        localProduct.numbers = [...(localProduct.numbers || []), ...newNumbersWithDate];
-        localProduct.last_update = new Date().toISOString();
-        localProduct.syncStatus = 'pending';
-        await saveToLocal('products', localProduct);
-
-        input.value = '';
-        await loadProductsFromLocal();
-        renderNumbers();
-        
-        if (isOnline) {
-            syncToServer();
-        }
-    };
-
-    function parseNumbers(input) {
-        const numbers = [];
-        const parts = input.split(',').map(s => s.trim());
-        parts.forEach(part => {
-            if (part.includes('-')) {
-                const [start, end] = part.split('-').map(s => parseInt(s.trim()));
-                if (!isNaN(start) && !isNaN(end) && start <= end) {
-                    for (let i = start; i <= end; i++) numbers.push(i.toString());
-                }
-            } else if (part) {
-                numbers.push(part);
-            }
-        });
-        return numbers;
-    }
-
-    window.removeNumber = async function (numIndex) {
-        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
-        const localProduct = localProducts.find(p => p.localId === currentProductId);
-        if (!localProduct) return;
-        
-        localProduct.numbers = (localProduct.numbers || []).filter((_, i) => i !== numIndex);
-        localProduct.last_update = new Date().toISOString();
-        localProduct.syncStatus = 'pending';
-        await saveToLocal('products', localProduct);
-        
-        await loadProductsFromLocal();
-        renderNumbers();
-        
-        if (isOnline) {
-            syncToServer();
-        }
-    };
-
-    window.deleteProduct = async function (event, productId) {
-        event.stopPropagation();
-        if (!confirm('❓ Точно удалить изделие?')) return;
-        
-        const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
-        const localProduct = localProducts.find(p => p.localId === productId);
-        if (!localProduct) return;
-        
-        if (localProduct.serverId) {
-            localProduct._pendingDelete = true;
-            localProduct.syncStatus = 'pending';
-            await saveToLocal('products', localProduct);
-        } else {
-            await deleteFromLocal('products', productId);
-        }
-        
-        await loadProductsFromLocal();
-        
-        if (isOnline) {
-            syncToServer();
-        }
-    };
-
-    function renderNumbers() {
-        const list = document.getElementById('numbersList');
-        const product = products.find(p => p.id === currentProductId);
-        if (!product || !(product.numbers || []).length) {
-            list.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">Номера не добавлены</p>';
-            return;
-        }
-        list.innerHTML = product.numbers.map((n, i) => `
-            <div class="number-tag">
-                <div>
-                    <span style="font-weight:600;">${n.value}</span>
-                    <br><small style="color: #64748b; font-size: 11px;">${n.added || '—'}</small>
-                </div>
-                <button class="remove-number" onclick="removeNumber(${i})">×</button>
-            </div>
-        `).join('');
-    }
-
-    window.showSummaryScreen = async function () {
-        const summary = {};
-        products.forEach(p => {
-            const status = p.is_active ? 'Активный' : 'Архив';
-            const syncStatus = p.syncStatus === 'pending' ? ' (не синхронизирован)' : '';
-            
-            if (!summary[p.name]) summary[p.name] = [];
-            
-            summary[p.name].push({
-                status: status + syncStatus,
-                created: new Date(p.created_at || Date.now()).toLocaleString('ru-RU'),
-                count: (p.numbers || []).length,
-                numbers: formatNumbersWithDate(p.numbers) // используем новую функцию
-            });
-        });
-
-        document.getElementById('jsonOutput').textContent = JSON.stringify(summary, null, 2);
-        document.getElementById('mainScreen').classList.add('hidden');
-        document.getElementById('summaryScreen').classList.remove('hidden');
-    };
-
-    window.backToMain = function () {
-        document.getElementById('summaryScreen').classList.add('hidden');
-        document.getElementById('mainScreen').classList.remove('hidden');
-    };
-
-    window.downloadJSON = function () {
-        const summary = {};
-        products.forEach(p => {
-            const status = p.is_active ? 'Активный' : 'Архив';
-            if (!summary[p.name]) summary[p.name] = [];
-            summary[p.name].push({
-                status: status,
-                created: new Date(p.created_at || Date.now()).toLocaleString('ru-RU'),
-                count: (p.numbers || []).length,
-                numbers: formatNumbersWithDate(p.numbers)
-            });
-        });
-
-        const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `summary_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
-    document.getElementById('productInput')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addProduct();
-    });
-
-    document.getElementById('numberInput')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addNumber();
-    });
-
-    document.getElementById('authEmail')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleAuth();
-    });
-
-    document.getElementById('authPassword')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleAuth();
-    });
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js');
-    }
-
-    init();
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL = 'https://ntsdwbrdxnexgjjekfqk.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50c2R3YnJkeG5leGdqamVrZnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MjQ0MDYsImV4cCI6MjA4NDIwMDQwNn0.5ZrQNwFD-m4Rq4lKzfhPEGbw8BXhIoYViC-nJORosyQ';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// ============ УТИЛИТЫ ============
+function generateId() {
+if (crypto.randomUUID) return crypto.randomUUID();
+return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+return v.toString(16);
+});
+}
+// ============ INDEXEDDB ============
+const DB_NAME = 'ProductsDB_v2';
+const DB_VERSION = 1;
+let db = null;
+function openDB() {
+return new Promise((resolve, reject) => {
+const request = indexedDB.open(DB_NAME, DB_VERSION);
+request.onerror = () => reject(request.error);
+request.onsuccess = () => resolve(request.result);
+request.onupgradeneeded = (event) => {
+const database = event.target.result;
+if (!database.objectStoreNames.contains('products')) {
+const store = database.createObjectStore('products', { keyPath: 'localId' });
+store.createIndex('user_id', 'user_id', { unique: false });
+store.createIndex('syncStatus', 'syncStatus', { unique: false });
+store.createIndex('serverId', 'serverId', { unique: false });
+}
+if (!database.objectStoreNames.contains('session')) {
+database.createObjectStore('session', { keyPath: 'key' });
+}
+};
+});
+}
+async function saveToLocal(storeName, data) {
+if (!db) db = await openDB();
+return new Promise((resolve, reject) => {
+const tx = db.transaction(storeName, 'readwrite');
+const store = tx.objectStore(storeName);
+const request = store.put(data);
+request.onsuccess = () => resolve(request.result);
+request.onerror = () => reject(request.error);
+});
+}
+async function getAllFromLocal(storeName, indexName, value) {
+if (!db) db = await openDB();
+return new Promise((resolve, reject) => {
+const tx = db.transaction(storeName, 'readonly');
+const store = tx.objectStore(storeName);
+let request;
+if (indexName && value !== undefined) {
+request = store.index(indexName).getAll(value);
+} else {
+request = store.getAll();
+}
+request.onsuccess = () => resolve(request.result);
+request.onerror = () => reject(request.error);
+});
+}
+async function deleteFromLocal(storeName, key) {
+if (!db) db = await openDB();
+return new Promise((resolve, reject) => {
+const tx = db.transaction(storeName, 'readwrite');
+const store = tx.objectStore(storeName);
+const request = store.delete(key);
+request.onsuccess = () => resolve();
+request.onerror = () => reject(request.error);
+});
+}
+async function clearLocalStore(storeName) {
+if (!db) db = await openDB();
+return new Promise((resolve, reject) => {
+const tx = db.transaction(storeName, 'readwrite');
+const store = tx.objectStore(storeName);
+const request = store.clear();
+request.onsuccess = () => resolve();
+request.onerror = () => reject(request.error);
+});
+}
+// ============ СЕССИЯ ============
+async function saveSession(user) {
+await saveToLocal('session', { key: 'currentUser', data: user });
+}
+async function getSession() {
+const sessions = await getAllFromLocal('session');
+const session = sessions.find(s => s.key === 'currentUser');
+return session ? session.data : null;
+}
+async function clearSession() {
+await deleteFromLocal('session', 'currentUser');
+}
+// ============ СЕТЬ ============
+let isOnline = navigator.onLine;
+let syncInProgress = false;
+function updateOnlineStatus() {
+isOnline = navigator.onLine;
+const banner = document.getElementById('offlineBanner');
+const syncBtn = document.getElementById('syncBtn');
+if (!isOnline) {
+banner.classList.remove('hidden');
+syncBtn.textContent = '🔄 Нет интернета';
+syncBtn.disabled = true;
+} else {
+banner.classList.add('hidden');
+syncBtn.textContent = '🔄 Синхронизировать';
+syncBtn.disabled = false;
+}
+}
+window.addEventListener('online', () => {
+updateOnlineStatus();
+if (currentUser) {
+loadProducts();
+}
+});
+window.addEventListener('offline', updateOnlineStatus);
+function updateSyncStatus(text, type) {
+const el = document.getElementById('syncStatus');
+el.textContent = text;
+el.className = 'sync-status ' + (type || '');
+}
+// ============ СИНХРОНИЗАЦИЯ ============
+async function syncToServer() {
+if (!isOnline || syncInProgress || !currentUser) return;
+const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+const pendingProducts = localProducts.filter(p => p.syncStatus === 'pending');
+if (pendingProducts.length === 0) {
+updateSyncStatus('Все данные синхронизированы ✅', 'success');
+return;
+}
+syncInProgress = true;
+updateSyncStatus(`Синхронизация ${pendingProducts.length} записей...`, 'syncing');
+for (const product of pendingProducts) {
+try {
+if (product._pendingDelete) {
+if (product.serverId) {
+await supabase.from('products').delete().eq('id', product.serverId).eq('user_id', currentUser.id);
+}
+await deleteFromLocal('products', product.localId);
+continue;
+}
+if (product.serverId) {
+const { error } = await supabase.from('products').update({
+numbers: product.numbers,
+last_update: new Date().toISOString(),
+is_active: product.is_active
+}).eq('id', product.serverId);
+if (error) throw error;
+product.syncStatus = 'synced';
+await saveToLocal('products', product);
+} else {
+const { data, error } = await supabase.from('products').insert({
+user_id: currentUser.id,
+name: product.name,
+numbers: product.numbers,
+last_update: new Date().toISOString(),
+is_active: product.is_active !== false
+}).select();
+if (error) throw error;
+if (data && data[0]) {
+product.serverId = data[0].id;
+product.syncStatus = 'synced';
+await saveToLocal('products', product);
+}
+}
+} catch (err) {
+console.error('Sync error:', err);
+product.syncStatus = 'error';
+await saveToLocal('products', product);
+}
+}
+syncInProgress = false;
+const remaining = (await getAllFromLocal('products', 'user_id', currentUser.id)).filter(p => p.syncStatus === 'pending').length;
+if (remaining === 0) {
+updateSyncStatus('Все данные синхронизированы ✅', 'success');
+} else {
+updateSyncStatus(`Ошибка синхронизации: ${remaining} записей`, 'error');
+}
+await loadProductsFromLocal();
+}
+window.forceSync = async function() {
+if (!isOnline) {
+alert('Нет подключения к интернету');
+return;
+}
+await syncToServer();
+};
+// ============ ОСНОВНАЯ ЛОГИКА ============
+let currentUser = null;
+let products = [];
+let currentProductId = null;
+let isLoginMode = true;
+const productInput = document.getElementById('productInput');
+const suggestionsBox = document.getElementById('suggestionsBox');
+async function init() {
+updateOnlineStatus();
+const localUser = await getSession();
+try {
+const { data: { user } } = await supabase.auth.getUser();
+if (user) {
+currentUser = user;
+await saveSession(user);
+showMainScreen();
+await loadProducts();
+} else if (localUser && !isOnline) {
+currentUser = localUser;
+showMainScreen();
+await loadProductsFromLocal();
+} else {
+showAuthScreen();
+}
+} catch (err) {
+if (localUser) {
+currentUser = localUser;
+showMainScreen();
+await loadProductsFromLocal();
+} else {
+showAuthScreen();
+}
+}
+document.getElementById('loadingScreen').classList.add('hidden');
+}
+supabase.auth.onAuthStateChange((event, session) => {
+if (event === 'SIGNED_IN') {
+currentUser = session.user;
+saveSession(session.user);
+showMainScreen();
+loadProducts();
+} else if (event === 'SIGNED_OUT') {
+currentUser = null;
+products = [];
+showAuthScreen();
+}
+});
+function showAuthScreen() {
+document.getElementById('authScreen').classList.remove('hidden');
+document.getElementById('mainScreen').classList.add('hidden');
+document.getElementById('summaryScreen').classList.add('hidden');
+document.getElementById('loadingScreen').classList.add('hidden');
+}
+function showMainScreen() {
+document.getElementById('authScreen').classList.add('hidden');
+document.getElementById('mainScreen').classList.remove('hidden');
+document.getElementById('summaryScreen').classList.add('hidden');
+document.getElementById('userEmail').textContent = currentUser.email;
+updateOnlineStatus();
+}
+async function loadProducts() {
+if (isOnline) {
+try {
+await loadProductsFromServer();
+} catch (err) {
+console.error('Server load failed:', err);
+await loadProductsFromLocal();
+}
+} else {
+await loadProductsFromLocal();
+}
+}
+async function loadProductsFromServer() {
+const { data, error } = await supabase
+.from('products')
+.select('*')
+.eq('user_id', currentUser.id)
+.order('is_active', { ascending: false })
+.order('last_update', { ascending: false });
+if (error) throw error;
+const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+for (const item of (data || [])) {
+const local = localProducts.find(p => p.serverId === item.id);
+if (local) {
+if (local.syncStatus === 'synced' && !local._pendingDelete) {
+local.name = item.name;
+local.numbers = item.numbers || [];
+local.is_active = item.is_active !== false;
+local.last_update = item.last_update || item.created_at;
+local.created_at = item.created_at;
+await saveToLocal('products', local);
+}
+} else {
+await saveToLocal('products', {
+localId: generateId(),
+serverId: item.id,
+user_id: item.user_id,
+name: item.name,
+numbers: item.numbers || [],
+is_active: item.is_active !== false,
+last_update: item.last_update || item.created_at,
+created_at: item.created_at,
+syncStatus: 'synced'
+});
+}
+}
+// Удаляем локальные synced записи, которых нет на сервере
+const serverIds = new Set((data || []).map(d => d.id));
+for (const local of localProducts) {
+if (local.serverId && local.syncStatus === 'synced' && !serverIds.has(local.serverId)) {
+await deleteFromLocal('products', local.localId);
+}
+}
+await loadProductsFromLocal();
+}
+async function loadProductsFromLocal() {
+const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+// 🔄 Миграция старых данных (строки -> объекты с датами)
+const today = new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' });
+localProducts.forEach(p => {
+  if (Array.isArray(p.numbers) && p.numbers.length > 0 && typeof p.numbers[0] === 'string') {
+    p.numbers = p.numbers.map(n => ({ val: n, date: today }));
+    saveToLocal('products', p);
+  }
+});
+products = localProducts
+.sort((a, b) => {
+if (a.is_active !== b.is_active) return (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0);
+return new Date(b.last_update || 0) - new Date(a.last_update || 0);
+})
+.map(p => ({
+id: p.localId,
+serverId: p.serverId,
+name: p.name,
+numbers: p.numbers || [],
+is_active: p.is_active !== false,
+last_update: p.last_update,
+created_at: p.created_at,
+syncStatus: p.syncStatus
+}));
+renderProducts();
+const pendingCount = localProducts.filter(p => p.syncStatus === 'pending').length;
+if (pendingCount > 0) {
+updateSyncStatus(`Ожидает синхронизации: ${pendingCount} записей`, 'error');
+} else {
+updateSyncStatus(isOnline ? 'Все данные синхронизированы ✅' : 'Работа в офлайн-режиме', isOnline ? 'success' : '');
+}
+}
+window.toggleAuthMode = function () {
+isLoginMode = !isLoginMode;
+const title = document.getElementById('authTitle');
+const btn = document.getElementById('authSubmitBtn');
+const toggleText = document.getElementById('authToggleText');
+if (isLoginMode) {
+title.textContent = 'Вход';
+btn.textContent = 'Войти';
+toggleText.textContent = 'Нет аккаунта?';
+} else {
+title.textContent = 'Регистрация';
+btn.textContent = 'Зарегистрироваться';
+toggleText.textContent = 'Уже есть аккаунт?';
+}
+document.getElementById('authError').innerHTML = '';
+document.getElementById('authSuccess').innerHTML = '';
+};
+window.handleAuth = async function () {
+const email = document.getElementById('authEmail').value.trim();
+const password = document.getElementById('authPassword').value;
+const errorDiv = document.getElementById('authError');
+const successDiv = document.getElementById('authSuccess');
+errorDiv.innerHTML = '';
+successDiv.innerHTML = '';
+if (!email || !password) {
+errorDiv.innerHTML = '<div class="error-message">Заполните все поля</div>';
+return;
+}
+const btn = document.getElementById('authSubmitBtn');
+btn.disabled = true;
+btn.textContent = 'Загрузка...';
+try {
+if (isLoginMode) {
+const { error } = await supabase.auth.signInWithPassword({ email, password });
+if (error) throw error;
+} else {
+const { error } = await supabase.auth.signUp({ email, password });
+if (error) throw error;
+successDiv.innerHTML = '<div class="success-message">Регистрация успешна! Проверьте email для подтверждения.</div>';
+}
+} catch (error) {
+errorDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
+btn.disabled = false;
+btn.textContent = isLoginMode ? 'Войти' : 'Зарегистрироваться';
+}
+};
+window.handleLogout = async function () {
+await clearSession();
+await clearLocalStore('products');
+await supabase.auth.signOut();
+currentUser = null;
+products = [];
+};
+window.addProduct = async function () {
+const input = document.getElementById('productInput');
+const name = input.value.trim().toUpperCase();
+if (!name) return;
+const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+const existingActive = localProducts.find(p => p.is_active && p.name.toLowerCase() === name.toLowerCase());
+if (existingActive) {
+existingActive.is_active = false;
+existingActive.last_update = new Date().toISOString();
+existingActive.syncStatus = 'pending';
+await saveToLocal('products', existingActive);
+}
+const newProduct = {
+localId: generateId(),
+user_id: currentUser.id,
+name: name,
+numbers: [],
+last_update: new Date().toISOString(),
+is_active: true,
+syncStatus: 'pending',
+serverId: null,
+created_at: new Date().toISOString()
+};
+await saveToLocal('products', newProduct);
+input.value = '';
+closeSuggestions();
+await loadProductsFromLocal();
+if (isOnline) {
+syncToServer();
+}
+};
+function renderProducts() {
+const list = document.getElementById('productsList');
+const empty = document.getElementById('emptyState');
+if (products.length === 0) {
+list.innerHTML = '';
+empty.classList.remove('hidden');
+return;
+}
+list.innerHTML = products.map(p => {
+const isArchived = !p.is_active;
+const archiveClass = isArchived ? 'archived' : '';
+const archiveBadge = isArchived ? '<span class="archive-badge">АРХИВ</span>' : '';
+const pendingBadge = p.syncStatus === 'pending' ? '<span class="pending-badge">⟳</span>' : '';
+const clickAction = isArchived ? '' : `onclick="openModal('${p.id}')"`;
+const cursorStyle = isArchived ? 'cursor: default;' : '';
+return `
+<div class="product-item ${archiveClass}" ${clickAction} style="${cursorStyle}">
+<div class="product-name">
+${p.name}
+${archiveBadge}
+${pendingBadge}
+</div>
+<div style="display: flex; align-items: center;">
+<div class="product-count">${(p.numbers || []).length} шт</div>
+<button class="delete-product-btn" onclick="deleteProduct(event, '${p.id}')">🗑️</button>
+</div>
+</div>
+`;
+}).join('');
+empty.classList.add('hidden');
+}
+productInput.addEventListener('input', (e) => {
+const query = e.target.value.toLowerCase().trim();
+if (query.length === 0) {
+closeSuggestions();
+return;
+}
+const filtered = products.filter(p => p.is_active && p.name.toLowerCase().includes(query));
+renderSuggestions(filtered);
+});
+document.addEventListener('click', (e) => {
+if (!productInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+closeSuggestions();
+}
+});
+function renderSuggestions(items) {
+suggestionsBox.innerHTML = '';
+if (items.length === 0) {
+suggestionsBox.style.display = 'none';
+return;
+}
+items.forEach(p => {
+const div = document.createElement('div');
+div.className = 'suggestion-item';
+div.innerHTML = `
+<span style="font-weight:600; color:#1e293b;">${p.name}</span>
+<span class="suggestion-meta">${(p.numbers || []).length} шт (Сейчас)</span>
+`;
+div.onclick = (e) => {
+e.stopPropagation();
+openModal(p.id);
+productInput.value = '';
+closeSuggestions();
+};
+suggestionsBox.appendChild(div);
+});
+suggestionsBox.style.display = 'block';
+}
+function closeSuggestions() {
+suggestionsBox.style.display = 'none';
+}
+window.openModal = function (productId) {
+const product = products.find(p => p.id === productId);
+if (!product || !product.is_active) return;
+currentProductId = productId;
+document.getElementById('modalTitle').textContent = product.name;
+document.getElementById('modal').style.display = 'block';
+renderNumbers();
+};
+window.closeModal = function () {
+document.getElementById('modal').style.display = 'none';
+document.getElementById('numberInput').value = '';
+currentProductId = null;
+};
+window.addNumber = async function () {
+const input = document.getElementById('numberInput');
+const value = input.value.trim();
+if (!value || !currentProductId) return;
+const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+const localProduct = localProducts.find(p => p.localId === currentProductId);
+if (!localProduct) return;
+const newNumbers = parseNumbers(value);
+localProduct.numbers = [...(localProduct.numbers || []), ...newNumbers];
+localProduct.last_update = new Date().toISOString();
+localProduct.syncStatus = 'pending';
+await saveToLocal('products', localProduct);
+input.value = '';
+await loadProductsFromLocal();
+renderNumbers();
+if (isOnline) {
+syncToServer();
+}
+};
+function parseNumbers(input) {
+const numbers = [];
+const dateStr = new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' });
+const parts = input.split(',').map(s => s.trim());
+parts.forEach(part => {
+if (part.includes('-')) {
+const [start, end] = part.split('-').map(s => parseInt(s.trim()));
+if (!isNaN(start) && !isNaN(end) && start <= end) {
+for (let i = start; i <= end; i++) numbers.push({ val: i.toString(), date: dateStr });
+}
+} else if (part) {
+numbers.push({ val: part, date: dateStr });
+}
+});
+return numbers;
+}
+window.removeNumber = async function (numIndex) {
+const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+const localProduct = localProducts.find(p => p.localId === currentProductId);
+if (!localProduct) return;
+localProduct.numbers = (localProduct.numbers || []).filter((_, i) => i !== numIndex);
+localProduct.last_update = new Date().toISOString();
+localProduct.syncStatus = 'pending';
+await saveToLocal('products', localProduct);
+await loadProductsFromLocal();
+renderNumbers();
+if (isOnline) {
+syncToServer();
+}
+};
+window.deleteProduct = async function (event, productId) {
+event.stopPropagation();
+if (!confirm('❓ Точно удалить изделие?')) return;
+const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
+const localProduct = localProducts.find(p => p.localId === productId);
+if (!localProduct) return;
+if (localProduct.serverId) {
+localProduct._pendingDelete = true;
+localProduct.syncStatus = 'pending';
+await saveToLocal('products', localProduct);
+} else {
+await deleteFromLocal('products', productId);
+}
+await loadProductsFromLocal();
+if (isOnline) {
+syncToServer();
+}
+};
+function renderNumbers() {
+const list = document.getElementById('numbersList');
+const product = products.find(p => p.id === currentProductId);
+if (!product || !(product.numbers || []).length) {
+list.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">Номера не добавлены</p>';
+return;
+}
+list.innerHTML = product.numbers.map((item, i) => {
+const val = typeof item === 'object' ? (item.val || item.n || '') : item;
+const date = typeof item === 'object' ? (item.date || item.d || '') : '';
+return `
+<div class="number-tag" style="position: relative;">
+<div>
+<div style="font-weight:600; color:#1e293b;">${val}</div>
+${date ? `<div class="number-date">${date}</div>` : ''}
+</div>
+<button class="remove-number" onclick="removeNumber(${i})">×</button>
+</div>
+`;
+}).join('');
+}
+window.showSummaryScreen = async function () {
+const summary = {};
+products.forEach(p => {
+const status = p.is_active ? 'Активный' : 'Архив';
+const syncStatus = p.syncStatus === 'pending' ? ' (не синхронизирован)' : '';
+if (!summary[p.name]) summary[p.name] = [];
+summary[p.name].push({
+status: status + syncStatus,
+created: new Date(p.created_at || Date.now()).toLocaleString('ru-RU'),
+count: (p.numbers || []).length,
+numbers: (p.numbers || []).map(item => {
+const val = typeof item === 'object' ? (item.val || item.n || '') : item;
+const date = typeof item === 'object' ? (item.date || item.d || '') : '';
+return date ? { [val]: date } : val;
+})
+});
+});
+document.getElementById('jsonOutput').textContent = JSON.stringify(summary, null, 2);
+document.getElementById('mainScreen').classList.add('hidden');
+document.getElementById('summaryScreen').classList.remove('hidden');
+};
+window.backToMain = function () {
+document.getElementById('summaryScreen').classList.add('hidden');
+document.getElementById('mainScreen').classList.remove('hidden');
+};
+window.downloadJSON = function () {
+const summary = {};
+products.forEach(p => {
+const status = p.is_active ? 'Активный' : 'Архив';
+if (!summary[p.name]) summary[p.name] = [];
+summary[p.name].push({
+status: status,
+created: new Date(p.created_at || Date.now()).toLocaleString('ru-RU'),
+count: (p.numbers || []).length,
+numbers: (p.numbers || []).map(item => {
+const val = typeof item === 'object' ? (item.val || item.n || '') : item;
+const date = typeof item === 'object' ? (item.date || item.d || '') : '';
+return date ? { [val]: date } : val;
+})
+});
+});
+const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `summary_${new Date().toISOString().split('T')[0]}.json`;
+a.click();
+URL.revokeObjectURL(url);
+};
+document.getElementById('productInput')?.addEventListener('keypress', (e) => {
+if (e.key === 'Enter') addProduct();
+});
+document.getElementById('numberInput')?.addEventListener('keypress', (e) => {
+if (e.key === 'Enter') addNumber();
+});
+document.getElementById('authEmail')?.addEventListener('keypress', (e) => {
+if (e.key === 'Enter') handleAuth();
+});
+document.getElementById('authPassword')?.addEventListener('keypress', (e) => {
+if (e.key === 'Enter') handleAuth();
+});
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('./sw.js');
+}
+init();
 </script>
+</body>
+</html>
