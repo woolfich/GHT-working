@@ -1,299 +1,4 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1e293b">
-    <title>Учёт изделий</title>
-    <link rel="manifest" href="./manifest.json">
-    <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-color: #f8fafc;
-        background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
-        background-size: 20px 20px;
-        min-height: 100vh;
-        padding: 20px;
-        color: #1e293b;
-        font-size: 16px;
-        line-height: 1.6;
-    }
-    .container { max-width: 640px; margin: 0 auto; height: 100%; }
-    .header { text-align: center; margin-bottom: 24px; padding: 10px; }
-    .header h1 { font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.025em; }
-    
-    .auth-container, .input-section, .user-info, .summary-container {
-        background: #ffffff; border-radius: 16px; padding: 28px;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e2e8f0;
-    }
-    
-    .auth-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; text-align: center; color: #0f172a; }
-    .input-group { display: flex; gap: 12px; align-items: center; }
-    
-    input {
-        flex: 1; padding: 14px 16px; border: 1px solid #cbd5e1; border-radius: 10px;
-        font-size: 16px; outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        background: #ffffff; color: #1e293b;
-    }
-    input:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
-    input::placeholder { color: #94a3b8; }
-    
-    button {
-        padding: 14px 24px; background: #2563eb; color: white; border: none;
-        border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
-        white-space: nowrap; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-    button:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    button:disabled { background: #94a3b8; opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-    
-    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-    .btn-secondary:hover { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
-    .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-    .btn-danger:hover { background: #fecaca; color: #991b1b; border-color: #fca5a5; }
-    .btn-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-    .btn-warning:hover { background: #fde68a; color: #78350f; }
-    
-    #mainScreen { display: flex; flex-direction: column; gap: 20px; height: calc(100vh - 80px); overflow: hidden; }
-    #summaryScreen { display: flex; flex-direction: column; height: calc(100vh - 40px); overflow: hidden; }
-    .summary-top-panel { flex-shrink: 0; padding-bottom: 20px; }
-    .summary-actions { display: flex; gap: 12px; }
-    .summary-actions button { flex: 1; }
-    .summary-scroll-wrapper { flex: 1; overflow-y: auto; padding-bottom: 24px; }
-    
-    .user-info { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; flex-shrink: 0; background: #ffffff; border-bottom: 1px solid #f1f5f9; }
-    .user-email { color: #64748b; font-size: 14px; font-weight: 500; }
-    
-    .products-wrapper { flex: 1; overflow-y: auto; padding: 4px; }
-    .products-list { display: flex; flex-direction: column; gap: 12px; }
-    
-    .product-item {
-        background: #ffffff; border-radius: 12px; padding: 16px 20px;
-        display: flex; justify-content: space-between; align-items: center;
-        cursor: pointer; border: 1px solid #e2e8f0; transition: all 0.2s ease;
-    }
-    .product-item:hover { border-color: #3b82f6; transform: translateX(4px); }
-    
-    .product-item.archived {
-        background: #f8fafc;
-        opacity: 0.7;
-        border-color: #e2e8f0;
-        cursor: default;
-    }
-    .product-item.archived:hover {
-        transform: none;
-        border-color: #e2e8f0;
-    }
-
-    .product-name { font-size: 16px; font-weight: 600; color: #0f172a; display: flex; align-items: center; gap: 8px; }
-    
-    .archive-badge {
-        font-size: 10px;
-        text-transform: uppercase;
-        background-color: #dcfce7;
-        color: #166534;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-weight: 800;
-        letter-spacing: 0.05em;
-    }
-
-    .pending-badge {
-        font-size: 10px;
-        text-transform: uppercase;
-        background-color: #fef3c7;
-        color: #92400e;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-weight: 800;
-        letter-spacing: 0.05em;
-    }
-
-    .product-count { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; margin-right: 12px; border: 1px solid #e2e8f0; }
-    
-    .delete-product-btn {
-        background: transparent; color: #94a3b8; border: 1px solid #e2e8f0;
-        border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center;
-        justify-content: center; cursor: pointer;
-    }
-    .delete-product-btn:hover { background: #fee2e2; color: #ef4444; border-color: #fecaca; }
-    
-    .input-section { margin-top: auto; padding: 24px; border-radius: 16px 16px 0 0; border-bottom: none; box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03); position: relative; z-index: 10; }
-    
-    .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 1000; backdrop-filter: blur(4px); }
-    .modal-content {
-        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        background: #ffffff; border-radius: 20px; padding: 32px; width: 90%;
-        max-width: 480px; max-height: 80vh; display: flex; flex-direction: column;
-        border: 1px solid #e2e8f0; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .modal-title { font-size: 20px; font-weight: 700; color: #0f172a; }
-    .close-btn { background: #f8fafc; color: #64748b; padding: 8px 16px; font-size: 13px; border: 1px solid #e2e8f0; }
-    .hint { font-size: 14px; color: #64748b; margin-bottom: 20px; }
-    
-    .numbers-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px; background: #f8fafc; border-radius: 12px; min-height: 80px; max-height: 35vh; overflow-y: auto; border: 1px solid #e2e8f0; }
-    .number-tag { background: #ffffff; color: #1e293b; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0; }
-    .remove-number { color: #94a3b8; background: transparent; border: none; cursor: pointer; font-size: 16px; padding: 2px; }
-    .remove-number:hover { color: #ef4444; }
-    
-    .empty-state { text-align: center; padding: 48px 24px; color: #94a3b8; font-size: 15px; background: #ffffff; border-radius: 16px; border: 2px dashed #e2e8f0; margin: 20px 0; }
-    .error-message { background: #fef2f2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #fee2e2; }
-    .success-message { background: #f0fdf4; color: #166534; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #dcfce7; }
-    .auth-toggle { text-align: center; margin-top: 24px; font-size: 14px; color: #64748b; }
-    .auth-toggle a { color: #2563eb; text-decoration: none; font-weight: 600; cursor: pointer; }
-    
-    .hidden { display: none !important; }
-    #jsonOutput { background: #1e293b; padding: 20px; border-radius: 12px; color: #e2e8f0; white-space: pre-wrap; font-family: monospace; }
-
-    .input-wrapper { position: relative; width: 100%; }
-    .suggestions-box {
-        position: absolute; bottom: 100%; left: 0; width: 100%; background: #ffffff;
-        border: 1px solid #e2e8f0; border-radius: 10px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 500;
-        max-height: 250px; overflow-y: auto; display: none; margin-bottom: 4px;
-    }
-    .suggestion-item { padding: 12px 16px; cursor: pointer; font-size: 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-    .suggestion-item:hover { background: #f8fafc; color: #2563eb; }
-    .suggestion-meta { font-size: 12px; color: #94a3b8; }
-
-    .offline-banner {
-        background: #fef3c7;
-        color: #92400e;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        border: 1px solid #fde68a;
-    }
-    .offline-banner.hidden { display: none !important; }
-
-    .sync-status {
-        font-size: 12px;
-        color: #64748b;
-        text-align: center;
-        margin-top: 8px;
-        padding: 4px;
-    }
-    .sync-status.syncing { color: #2563eb; }
-    .sync-status.error { color: #dc2626; }
-    .sync-status.success { color: #16a34a; }
-
-    .loading-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(255,255,255,0.9);
-        z-index: 2000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 16px;
-    }
-    .loading-overlay.hidden { display: none !important; }
-    .spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid #e2e8f0;
-        border-top-color: #2563eb;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header"><h1>Учёт изделий</h1></div>
-
-        <div id="loadingScreen" class="loading-overlay">
-            <div class="spinner"></div>
-            <p>Загрузка...</p>
-        </div>
-
-        <div id="authScreen" class="hidden">
-            <div class="auth-container">
-                <div class="auth-title" id="authTitle">Вход</div>
-                <div id="authError"></div>
-                <div id="authSuccess"></div>
-                <input type="email" id="authEmail" placeholder="Email" style="width:100%">
-                <input type="password" id="authPassword" placeholder="Пароль" style="width:100%; margin-top: 10px;">
-                <button id="authSubmitBtn" onclick="handleAuth()" style="width: 100%; margin-top: 12px;">Войти</button>
-                <div class="auth-toggle">
-                    <span id="authToggleText">Нет аккаунта?</span>
-                    <a onclick="toggleAuthMode()">Зарегистрироваться</a>
-                </div>
-            </div>
-        </div>
-
-        <div id="mainScreen" class="hidden">
-            <div class="offline-banner hidden" id="offlineBanner">
-                ⚠️ Офлайн-режим. Данные сохранены локально.
-            </div>
-            <div class="user-info">
-                <div class="user-email" id="userEmail">user@example.com</div>
-                <button class="logout-btn btn-danger" onclick="handleLogout()">Выйти</button>
-            </div>
-            
-            <div class="products-wrapper">
-                <div class="products-list" id="productsList"></div>
-                <div class="empty-state hidden" id="emptyState"><p>Добавьте первое изделие</p></div>
-            </div>
-
-            <div class="input-section">
-                <div id="syncStatus" class="sync-status"></div>
-                <div class="input-wrapper">
-                    <div class="input-group">
-                        <input type="text" id="productInput" placeholder="Название (напр. ХТ04)" autocomplete="off">
-                        <button onclick="addProduct()">Добавить</button>
-                    </div>
-                    <div id="suggestionsBox" class="suggestions-box"></div>
-                </div>
-                <button onclick="forceSync()" class="btn-warning" style="width: 100%; margin-top: 8px;" id="syncBtn">🔄 Синхронизировать</button>
-                <button onclick="showSummaryScreen()" class="btn-secondary" style="width: 100%; margin-top: 8px;">📋 Сводный список</button>
-            </div>
-        </div>
-
-        <div id="summaryScreen" class="hidden">
-            <div class="summary-top-panel">
-                <div class="header"><h1>📋 Сводный список</h1></div>
-                <div class="summary-actions">
-                    <button onclick="downloadJSON()">💾 Скачать JSON</button>
-                    <button onclick="backToMain()" class="btn-secondary">⬅ Назад</button>
-                </div>
-            </div>
-            <div class="summary-scroll-wrapper">
-                <div class="summary-container">
-                    <pre id="jsonOutput"></pre>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal" id="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title" id="modalTitle"></div>
-                    <button class="close-btn" onclick="closeModal()">Назад</button>
-                </div>
-                <div class="input-group">
-                    <input type="text" id="numberInput" placeholder="Номер изделия">
-                    <button onclick="addNumber()">Добавить</button>
-                </div>
-                <p class="hint">Для добавления нескольких: 55, 56, 57 или 55-60</p>
-                <div class="numbers-list" id="numbersList"></div>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
+<script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
     
     const SUPABASE_URL = 'https://ntsdwbrdxnexgjjekfqk.supabase.co';
@@ -307,6 +12,12 @@
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
+    }
+
+    // Новая функция форматирования номера с датой для отображения в JSON
+    function formatNumbersWithDate(numbers) {
+        if (!numbers || !numbers.length) return [];
+        return numbers.map(n => `${n.value}, ${n.added}`);
     }
 
     // ============ INDEXEDDB ============
@@ -600,11 +311,19 @@
         const localProducts = await getAllFromLocal('products', 'user_id', currentUser.id);
 
         for (const item of (data || [])) {
+            // Убедимся, что numbers – массив объектов {value, added} (может прийти как массив строк при первой миграции)
+            let numbers = item.numbers || [];
+            // Преобразуем старые строки в объекты без даты (добавим текущую дату как заглушку)
+            numbers = numbers.map(n => {
+                if (typeof n === 'string') return { value: n, added: new Date().toLocaleDateString('ru-RU') };
+                return n;
+            });
+
             const local = localProducts.find(p => p.serverId === item.id);
             if (local) {
                 if (local.syncStatus === 'synced' && !local._pendingDelete) {
                     local.name = item.name;
-                    local.numbers = item.numbers || [];
+                    local.numbers = numbers;
                     local.is_active = item.is_active !== false;
                     local.last_update = item.last_update || item.created_at;
                     local.created_at = item.created_at;
@@ -616,7 +335,7 @@
                     serverId: item.id,
                     user_id: item.user_id,
                     name: item.name,
-                    numbers: item.numbers || [],
+                    numbers: numbers,
                     is_active: item.is_active !== false,
                     last_update: item.last_update || item.created_at,
                     created_at: item.created_at,
@@ -625,7 +344,6 @@
             }
         }
 
-        // Удаляем локальные synced записи, которых нет на сервере
         const serverIds = new Set((data || []).map(d => d.id));
         for (const local of localProducts) {
             if (local.serverId && local.syncStatus === 'synced' && !serverIds.has(local.serverId)) {
@@ -738,7 +456,7 @@
             localId: generateId(),
             user_id: currentUser.id,
             name: name,
-            numbers: [],
+            numbers: [], // теперь массив объектов
             last_update: new Date().toISOString(),
             is_active: true,
             syncStatus: 'pending',
@@ -864,7 +582,10 @@
         if (!localProduct) return;
         
         const newNumbers = parseNumbers(value);
-        localProduct.numbers = [...(localProduct.numbers || []), ...newNumbers];
+        const now = new Date().toLocaleDateString('ru-RU'); // ДД.ММ.ГГ
+        const newNumbersWithDate = newNumbers.map(num => ({ value: num, added: now }));
+        
+        localProduct.numbers = [...(localProduct.numbers || []), ...newNumbersWithDate];
         localProduct.last_update = new Date().toISOString();
         localProduct.syncStatus = 'pending';
         await saveToLocal('products', localProduct);
@@ -942,9 +663,12 @@
             list.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">Номера не добавлены</p>';
             return;
         }
-        list.innerHTML = product.numbers.map((num, i) => `
+        list.innerHTML = product.numbers.map((n, i) => `
             <div class="number-tag">
-                ${num}
+                <div>
+                    <span style="font-weight:600;">${n.value}</span>
+                    <br><small style="color: #64748b; font-size: 11px;">${n.added || '—'}</small>
+                </div>
                 <button class="remove-number" onclick="removeNumber(${i})">×</button>
             </div>
         `).join('');
@@ -962,7 +686,7 @@
                 status: status + syncStatus,
                 created: new Date(p.created_at || Date.now()).toLocaleString('ru-RU'),
                 count: (p.numbers || []).length,
-                numbers: p.numbers || []
+                numbers: formatNumbersWithDate(p.numbers) // используем новую функцию
             });
         });
 
@@ -985,7 +709,7 @@
                 status: status,
                 created: new Date(p.created_at || Date.now()).toLocaleString('ru-RU'),
                 count: (p.numbers || []).length,
-                numbers: p.numbers || []
+                numbers: formatNumbersWithDate(p.numbers)
             });
         });
 
@@ -1019,6 +743,4 @@
     }
 
     init();
-    </script>
-</body>
-</html>
+</script>
